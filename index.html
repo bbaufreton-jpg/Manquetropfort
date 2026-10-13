@@ -4,6 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Gestion du Manque - Love Tracker Duo</title>
+  
+  <!-- PWA Metadata & Mobile App Tags -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Love Duo">
+  <meta name="theme-color" content="#0d41e1">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2589/2589175.png">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -144,6 +153,28 @@
               <div class="text-2xl font-bold text-slate-900" id="stat-projects-count">0</div>
               <p class="text-xs font-semibold text-slate-500 mt-0.5 leading-tight">Projets prévus</p>
             </div>
+          </div>
+        </div>
+
+        <!-- WIDGET MOOD TRACKER & PING AMOUR -->
+        <div class="px-5 mt-4 space-y-3">
+          <!-- Ping direct -->
+          <button onclick="sendLovePing()" class="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white font-extrabold text-xs py-3 rounded-2xl shadow-md hover:from-rose-600 hover:to-pink-600 transition flex items-center justify-center gap-2">
+            <i class="fas fa-paper-plane text-sm"></i> Envoyer un "Je pense à toi" en direct 💭
+          </button>
+
+          <!-- Humeur du jour -->
+          <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-2">Mon humeur aujourd'hui :</span>
+            <div class="grid grid-cols-4 gap-2">
+              <button onclick="setMood('🥰 Câlin(e)')" class="mood-btn p-2 rounded-xl bg-slate-50 border border-slate-200 text-xl hover:bg-rose-50 transition">🥰</button>
+              <button onclick="setMood('🥺 Manque fort')" class="mood-btn p-2 rounded-xl bg-slate-50 border border-slate-200 text-xl hover:bg-rose-50 transition">🥺</button>
+              <button onclick="setMood('😴 Fatigué(e)')" class="mood-btn p-2 rounded-xl bg-slate-50 border border-slate-200 text-xl hover:bg-rose-50 transition">😴</button>
+              <button onclick="setMood('🥳 En forme')" class="mood-btn p-2 rounded-xl bg-slate-50 border border-slate-200 text-xl hover:bg-rose-50 transition">🥳</button>
+            </div>
+            <p id="partner-mood-display" class="text-xs font-medium text-slate-600 mt-3 pt-2 border-t border-slate-100 flex items-center gap-2">
+              <i class="fas fa-smile text-brand-blue"></i> <span>Humeur de l'autre : Non renseignée</span>
+            </p>
           </div>
         </div>
 
@@ -333,7 +364,7 @@
       </button>
     </nav>
 
-    <!-- LIGHTBOX / VISIONNEUSE PHOTO PLEIN ÉCRAN -->
+    <!-- LIGHTBOX / VISIONNEUSE PHOTO -->
     <div id="modal-photo-viewer" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col justify-between p-4 z-50 hidden" onclick="closeModal('modal-photo-viewer')">
       <div class="flex justify-between items-center text-white pt-2" onclick="event.stopPropagation()">
         <div>
@@ -352,7 +383,7 @@
       </div>
     </div>
 
-    <!-- MODAL FENÊTRE SOS URGENCE EXTRÊME -->
+    <!-- MODAL SOS URGENCE EXTRÊME -->
     <div id="modal-panic" class="fixed inset-0 bg-rose-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
       <div class="bg-white w-full max-w-xs rounded-3xl p-6 text-center shadow-2xl relative border-2 border-rose-500">
         <div class="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto text-2xl mb-3 shadow-inner">
@@ -360,17 +391,10 @@
         </div>
         <h3 class="text-lg font-black text-slate-900">ALERTE SOS MANQUE 🚨</h3>
         <p class="text-xs text-slate-600 mt-2 leading-relaxed">
-          Le manque est trop fort ? Ne restez pas seul avec ce sentiment, réagissez tout de suite !
+          Le manque est trop fort ? Ne restez pas seul avec ce sentiment !
         </p>
 
-        <div class="my-4 p-3 bg-rose-50 border border-rose-100 rounded-2xl text-left">
-          <span class="text-[10px] font-extrabold text-rose-600 uppercase tracking-wider block">Conseil d'urgence :</span>
-          <p class="text-xs text-slate-700 font-semibold mt-0.5 leading-snug">
-            Appelez-la immédiatement ou envoyez-lui un petit mot doux. Elle pense sûrement à vous en ce moment.
-          </p>
-        </div>
-
-        <div class="space-y-2">
+        <div class="space-y-2 mt-4">
           <button onclick="closeModal('modal-panic'); openCallPartnerModal();" class="w-full bg-brand-blue text-white text-xs font-extrabold py-3 rounded-xl shadow-lg hover:bg-brand-darkblue transition flex items-center justify-center gap-2">
             <i class="fas fa-phone"></i> L'appeler directement
           </button>
@@ -378,7 +402,7 @@
             <i class="fas fa-comment-dots"></i> Lui envoyer un mot doux
           </button>
           <button onclick="closeModal('modal-panic')" class="w-full text-slate-400 text-xs font-semibold py-1.5 hover:text-slate-600">
-            Fermer l'alerte
+            Fermer
           </button>
         </div>
       </div>
@@ -502,11 +526,11 @@
     let selectedImageBase64 = null;
 
     window.appState = {
-      userProfile: { name: "", phone: "", teleportUsedForTarget: "" },
+      userProfile: { name: "", phone: "", teleportUsedForTarget: "", mood: "" },
       sharedData: { 
         startDate: new Date(Date.now() - 3*24*60*60*1000).toISOString(),
         targetDate: new Date(Date.now() + 3*24*60*60*1000).toISOString(), 
-        thoughts: [], memories: [], reunionProjects: [] 
+        thoughts: [], memories: [], reunionProjects: [], lastLovePing: null, moods: {}
       }
     };
 
@@ -521,12 +545,22 @@
         if (userDoc.exists()) {
           window.appState.userProfile = userDoc.data();
         } else {
-          window.appState.userProfile = { name: user.email.split('@')[0], phone: "", teleportUsedForTarget: "" };
+          window.appState.userProfile = { name: user.email.split('@')[0], phone: "", teleportUsedForTarget: "", mood: "" };
         }
 
         onSnapshot(doc(db, "couples", COUPLE_ROOM_ID), (snapshot) => {
           if (snapshot.exists()) {
-            window.appState.sharedData = snapshot.data();
+            const data = snapshot.data();
+            
+            // Écouter le Ping Amour en direct
+            if (data.lastLovePing && data.lastLovePing.sender !== (window.appState.userProfile.name || 'Moi')) {
+              if (!window.lastPingTime || data.lastLovePing.time > window.lastPingTime) {
+                window.lastPingTime = data.lastLovePing.time;
+                window.triggerLovePingEffect(data.lastLovePing.sender);
+              }
+            }
+
+            window.appState.sharedData = data;
             window.renderSharedContent();
           }
         });
@@ -558,11 +592,36 @@
       const pass = document.getElementById('auth-password').value;
       try {
         const res = await createUserWithEmailAndPassword(auth, email, pass);
-        await setDoc(doc(db, "users", res.user.uid), { name: email.split('@')[0], phone: "", teleportUsedForTarget: "" });
+        await setDoc(doc(db, "users", res.user.uid), { name: email.split('@')[0], phone: "", teleportUsedForTarget: "", mood: "" });
       } catch (err) { alert(err.message); }
     };
 
     window.logoutUser = () => signOut(auth);
+
+    // ENVOI PING AMOUR & EFFET
+    window.sendLovePing = async () => {
+      const me = window.appState.userProfile.name || 'Moi';
+      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), {
+        lastLovePing: { sender: me, time: Date.now() }
+      }, { merge: true });
+      try { confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } }); } catch(e){}
+      window.showToast("Pensée envoyée en direct ! 💭💕");
+    };
+
+    window.triggerLovePingEffect = (senderName) => {
+      try { confetti({ particleCount: 80, spread: 80, origin: { y: 0.5 } }); } catch(e){}
+      window.showToast(`${senderName} vient de vous envoyer un "Je pense à toi" ! 💖`);
+    };
+
+    // HUMEUR DU JOUR
+    window.setMood = async (moodText) => {
+      const me = window.appState.userProfile.name || 'Moi';
+      if (!window.appState.sharedData.moods) window.appState.sharedData.moods = {};
+      window.appState.sharedData.moods[me] = moodText;
+
+      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), { moods: window.appState.sharedData.moods }, { merge: true });
+      window.showToast(`Humeur mise à jour : ${moodText}`);
+    };
 
     window.getAuthorStyles = (authorName) => {
       const name = (authorName || '').toLowerCase();
@@ -649,14 +708,6 @@
       window.showToast("Projet ajouté !");
     };
 
-    window.openPhotoViewer = (img, title, sub, author) => {
-      document.getElementById('viewer-photo-img').src = img;
-      document.getElementById('viewer-photo-title').innerText = title;
-      document.getElementById('viewer-photo-sub').innerText = sub;
-      document.getElementById('viewer-photo-author').innerText = "Par " + (author || 'Duo');
-      document.getElementById('modal-photo-viewer').classList.remove('hidden');
-    };
-
     window.renderUserProfile = () => {
       const p = window.appState.userProfile;
       document.getElementById('my-name-pill').innerText = `Compte : ${p.name || 'Moi'}`;
@@ -682,6 +733,18 @@
 
     window.renderSharedContent = () => {
       const s = window.appState.sharedData;
+      const me = window.appState.userProfile.name || 'Moi';
+      const isLauriane = me.toLowerCase().includes('lauriane');
+      const partnerName = isLauriane ? 'Benjamin' : 'Lauriane';
+
+      // Afficher l'humeur du partenaire
+      if (s.moods) {
+        const partnerMood = Object.keys(s.moods).find(k => k.toLowerCase() !== me.toLowerCase());
+        const partnerMoodEl = document.getElementById('partner-mood-display');
+        if (partnerMood && s.moods[partnerMood]) {
+          partnerMoodEl.innerHTML = `<i class="fas fa-smile text-brand-blue"></i> <span>Humeur de ${partnerName} : <b>${s.moods[partnerMood]}</b></span>`;
+        }
+      }
 
       const gallery = document.getElementById('gallery-grid');
       gallery.innerHTML = '';
@@ -907,6 +970,14 @@
       }
     };
 
+    window.openPhotoViewer = (img, title, sub, author) => {
+      document.getElementById('viewer-photo-img').src = img;
+      document.getElementById('viewer-photo-title').innerText = title;
+      document.getElementById('viewer-photo-sub').innerText = sub;
+      document.getElementById('viewer-photo-author').innerText = "Par " + (author || 'Duo');
+      document.getElementById('modal-photo-viewer').classList.remove('hidden');
+    };
+
     window.handleMemoryImageSelect = (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -954,6 +1025,13 @@
     };
 
     setInterval(window.updateCountdown, 1000);
+
+    // ENREGISTREMENT SERVICE WORKER PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Load err:', err));
+      });
+    }
   </script>
 </body>
 </html>
