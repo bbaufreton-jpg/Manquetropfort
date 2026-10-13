@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notre Espace Partagé</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #f4f6f9; color: #333; padding: 20px; }
+    .container { max-width: 800px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    h1, h2 { color: #2c3e50; margin-bottom: 15px; }
+    .hidden { display: none; }
+    
+    /* Formulaires */
+    input, textarea, button { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; }
+    button { background-color: #3498db; color: white; font-weight: bold; border: none; cursor: pointer; transition: background 0.2s; }
+    button:hover { background-color: #2980b9; }
+    .btn-danger { background-color: #e74c3c; width: auto; padding: 8px 15px; }
+    .btn-danger:hover { background-color: #c0392b; }
+    
+    /* Layout */
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
+    .section-card { background: #fafafa; border: 1px solid #e1e8ed; padding: 18px; border-radius: 10px; margin-bottom: 25px; }
+    .item-list { list-style: none; margin-top: 10px; }
+    .item-card { background: white; border-left: 4px solid #3498db; padding: 12px; border-radius: 6px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .item-card.memory { border-left-color: #e67e22; }
+    .item-card small { color: #7f8c8d; display: block; margin-top: 5px; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- PAGE DE CONNEXION -->
+    <div id="auth-section">
+      <h1>Bienvenue</h1>
+      <p style="margin-bottom: 15px; color: #666;">Connectez-vous pour accéder à votre espace personnel et partagé.</p>
+      <input type="email" id="email" placeholder="Adresse e-mail">
+      <input type="password" id="password" placeholder="Mot de passe">
+      <button onclick="login()">Se connecter</button>
+      <button onclick="register()" style="background-color: #2ecc71;">Créer un compte</button>
+      <p id="auth-error" style="color: red; margin-top: 10px;"></p>
+    </div>
+
+    <!-- APPLICATION (Visible après connexion) -->
+    <div id="app-section" class="hidden">
+      <div class="header">
+        <h2>Espace de <span id="user-email" style="color: #3498db;"></span></h2>
+        <button onclick="logout()" class="btn-danger">Déconnexion</button>
+      </div>
+
+      <!-- SECTION PRIVÉE -->
+      <div class="section-card">
+        <h2>🔒 Mes Infos / Notes Privées</h2>
+        <p style="font-size: 13px; color: #777; margin-bottom: 10px;">Ces informations ne sont visibles que par vous.</p>
+        <textarea id="private-input" placeholder="Ajouter une note personnelle..."></textarea>
+        <button onclick="addPrivateNote()">Enregistrer la note</button>
+        <ul id="private-list" class="item-list"></ul>
+      </div>
+
+      <!-- SECTION PARTAGÉE -->
+      <div class="section-card" style="border-color: #f39c12;">
+        <h2>🧡 Souvenirs Partagés</h2>
+        <p style="font-size: 13px; color: #777; margin-bottom: 10px;">Ces souvenirs sont visibles et synchronisés en temps réel pour les deux utilisateurs.</p>
+        <input type="text" id="memory-title" placeholder="Titre du souvenir">
+        <textarea id="memory-desc" placeholder="Racontez le souvenir..."></textarea>
+        <button onclick="addSharedMemory()" style="background-color: #e67e22;">Ajouter le souvenir</button>
+        <ul id="shared-list" class="item-list"></ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SCRIPTS FIREBASE -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Vos clés de configuration Firebase obtenues à l'écran
+    const firebaseConfig = {
+      apiKey: "AIzaSyCMVojNde1zUs8pNn7Lkw5oxZb2hbhGAq0",
+      authDomain: "manque-trop-fort.firebaseapp.com",
+      projectId: "manque-trop-fort",
+      storageBucket: "manque-trop-fort.firebasestorage.app",
+      messagingSenderId: "784351605587",
+      appId: "1:784351605587:web:8655e0beea44eb9be7edb4"
+    };
+
+    // Initialisation
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+
+    // Gestion de la connexion / déconnexion
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('app-section').classList.remove('hidden');
+        document.getElementById('user-email').textContent = user.email;
+        
+        loadPrivateNotes();
+        loadSharedMemories();
+      } else {
+        currentUser = null;
+        document.getElementById('auth-section').classList.remove('hidden');
+        document.getElementById('app-section').classList.add('hidden');
+      }
+    });
+
+    // Fonctions d'Authentification
+    window.login = async () => {
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+      } catch (err) {
+        document.getElementById('auth-error').textContent = "Erreur : " + err.message;
+      }
+    };
+
+    window.register = async () => {
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+      try {
+        await createUserWithEmailAndPassword(auth, email, pass);
+      } catch (err) {
+        document.getElementById('auth-error').textContent = "Erreur : " + err.message;
+      }
+    };
+
+    window.logout = () => signOut(auth);
+
+    // Ajouter / Charger Notes Privées
+    window.addPrivateNote = async () => {
+      const text = document.getElementById('private-input').value;
+      if (!text) return;
+      await addDoc(collection(db, "private_notes"), {
+        userId: currentUser.uid,
+        content: text,
+        createdAt: serverTimestamp()
+      });
+      document.getElementById('private-input').value = '';
+    };
+
+    function loadPrivateNotes() {
+      const q = query(
+        collection(db, "private_notes"), 
+        where("userId", "==", currentUser.uid)
+      );
+      onSnapshot(q, (snapshot) => {
+        const list = document.getElementById('private-list');
+        list.innerHTML = '';
+        snapshot.forEach(doc => {
+          const item = doc.data();
+          list.innerHTML += `<li class="item-card"><p>${item.content}</p></li>`;
+        });
+      });
+    }
+
+    // Ajouter / Charger Souvenirs Partagés
+    window.addSharedMemory = async () => {
+      const title = document.getElementById('memory-title').value;
+      const desc = document.getElementById('memory-desc').value;
+      if (!title || !desc) return;
+
+      await addDoc(collection(db, "shared_memories"), {
+        title: title,
+        description: desc,
+        author: currentUser.email,
+        createdAt: serverTimestamp()
+      });
+
+      document.getElementById('memory-title').value = '';
+      document.getElementById('memory-desc').value = '';
+    };
+
+    function loadSharedMemories() {
+      const q = query(collection(db, "shared_memories"));
+      onSnapshot(q, (snapshot) => {
+        const list = document.getElementById('shared-list');
+        list.innerHTML = '';
+        snapshot.forEach(doc => {
+          const item = doc.data();
+          list.innerHTML += `
+            <li class="item-card memory">
+              <strong>${item.title}</strong>
+              <p>${item.description}</p>
+              <small>Ajouté par : ${item.author}</small>
+            </li>`;
+        });
+      });
+    }
+  </script>
+</body>
+</html>
