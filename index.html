@@ -48,7 +48,7 @@
 
   <div class="w-full max-w-md h-full sm:h-[844px] bg-slate-50 sm:rounded-[40px] shadow-2xl flex flex-col overflow-hidden relative border-0 sm:border-[8px] sm:border-slate-800">
     
-    <!-- Top Mobile Simulation Notch -->
+    <!-- Top Mobile Notch -->
     <div class="hidden sm:flex justify-between items-center px-6 pt-3 pb-1 bg-brand-blue text-white text-xs font-semibold z-50">
       <span id="notch-clock">09:41</span>
       <div class="w-20 h-4 bg-slate-900 rounded-full mx-auto"></div>
@@ -65,33 +65,58 @@
       <span id="toast-message">Action effectuée</span>
     </div>
 
-    <!-- MAIN SCROLLABLE WRAPPER -->
-    <main id="app-container" class="flex-1 overflow-y-auto hide-scrollbar pb-24 relative">
+    <!-- ÉCRAN DE CONNEXION SÉCURISÉ -->
+    <div id="auth-screen" class="flex-1 flex flex-col justify-center items-center p-6 bg-slate-50 z-50">
+      <div class="w-16 h-16 bg-blue-100 text-brand-blue rounded-3xl flex items-center justify-center text-3xl mb-4 shadow-sm">
+        <i class="fas fa-heart text-brand-blue"></i>
+      </div>
+      <h2 class="text-2xl font-extrabold text-slate-900 mb-1">Love Tracker Duo</h2>
+      <p class="text-xs text-slate-500 mb-6 text-center">Connectez-vous pour accéder à votre espace sécurisé.</p>
+
+      <div class="w-full space-y-3">
+        <div>
+          <label class="text-[11px] font-bold text-slate-600 block mb-1">E-mail</label>
+          <input type="email" id="auth-email" placeholder="votre@email.com" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-brand-blue font-semibold">
+        </div>
+        <div>
+          <label class="text-[11px] font-bold text-slate-600 block mb-1">Mot de passe</label>
+          <input type="password" id="auth-password" placeholder="••••••••" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-brand-blue font-semibold">
+        </div>
+        <p id="auth-error-msg" class="text-[11px] text-rose-500 font-semibold hidden"></p>
+
+        <button onclick="loginUser()" class="w-full bg-brand-blue text-white font-bold text-xs py-3 rounded-xl shadow hover:bg-brand-darkblue transition">
+          Se connecter
+        </button>
+        <button onclick="registerUser()" class="w-full bg-emerald-500 text-white font-bold text-xs py-3 rounded-xl shadow hover:bg-emerald-600 transition">
+          Créer un compte
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER (Masqué avant connexion) -->
+    <main id="app-container" class="flex-1 overflow-y-auto hide-scrollbar pb-24 relative hidden">
       
       <!-- TAB ACCUEIL -->
       <section id="tab-accueil" class="tab-content transition-opacity duration-300">
         <div class="bg-brand-blue text-white pt-6 pb-14 px-6 rounded-b-[36px] relative shadow-md">
           <div class="flex justify-between items-center mb-3">
-            <button onclick="openAccountAuthModal()" class="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-md pl-1.5 pr-3 py-1 rounded-full text-[11px] font-bold text-white transition border border-white/20">
+            <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md pl-1.5 pr-3 py-1 rounded-full text-[11px] font-bold text-white border border-white/20">
               <span id="my-avatar-badge" class="w-5 h-5 rounded-full bg-white text-brand-blue flex items-center justify-center text-xs shadow-sm">👦</span>
-              <span class="truncate max-w-[100px]" id="my-name-pill">Compte : Ben</span>
-              <i class="fas fa-lock text-[9px] opacity-70"></i>
-            </button>
+              <span class="truncate max-w-[120px]" id="my-name-pill">Compte : ...</span>
+            </div>
 
-            <button onclick="openAccountAuthModal()" class="inline-flex items-center gap-1.5 bg-black/20 hover:bg-black/30 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-semibold text-white transition border border-white/10">
-              <span id="duo-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 duo-sync-indicator"></span>
-              <span id="duo-room-header-badge">Salon Duo</span>
-              <i class="fas fa-link text-[10px] ml-0.5 opacity-70"></i>
+            <button onclick="logoutUser()" class="bg-black/20 hover:bg-black/30 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-semibold text-white transition border border-white/10">
+              <i class="fas fa-power-off text-[10px] mr-1"></i> Déconnexion
             </button>
           </div>
 
           <div class="mb-4">
             <span class="text-blue-200 text-[11px] uppercase tracking-wider font-bold flex items-center gap-1.5">
-              <span>Espace personnel connecté</span>
-              <i class="fas fa-heart text-rose-300 text-[9px]"></i>
+              <span>Espace connecté & sécurisé</span>
+              <i class="fas fa-lock text-rose-300 text-[9px]"></i>
             </span>
-            <h1 class="text-3xl font-extrabold tracking-tight mt-0.5" id="display-title">
-              Le manque de <span class="partner-name-text">Lauriane</span>
+            <h1 class="text-3xl font-extrabold tracking-tight mt-0.5">
+              Gestion du Manque
             </h1>
           </div>
 
@@ -99,7 +124,7 @@
           <div class="glass-card rounded-3xl p-5 text-center shadow-lg relative overflow-hidden">
             <div class="flex justify-center items-center gap-1.5 text-amber-300 text-xs sm:text-sm font-semibold mb-2">
               <i class="fas fa-sparkles"></i>
-              <span>Compte à rebours avant de revoir <span class="partner-name-text">Lauriane</span> :</span>
+              <span>Compte à rebours des retrouvailles :</span>
               <i class="fas fa-sparkles"></i>
             </div>
 
@@ -113,7 +138,7 @@
               <div class="flex flex-col"><span class="text-3xl sm:text-4xl font-extrabold" id="cd-secs">00</span><span class="text-[10px] uppercase text-blue-200 font-semibold">Secs</span></div>
             </div>
 
-            <p class="text-blue-100 font-medium text-sm mt-1" id="sleeps-summary">Plus que 2 dodos ! 🌙</p>
+            <p class="text-blue-100 font-medium text-sm mt-1" id="sleeps-summary">Plus que 0 dodos ! 🌙</p>
           </div>
         </div>
 
@@ -124,7 +149,7 @@
               <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
             </div>
             <div class="mt-3">
-              <div class="text-2xl font-bold text-slate-900" id="stat-dodos">2</div>
+              <div class="text-2xl font-bold text-slate-900" id="stat-dodos">0</div>
               <p class="text-xs font-semibold text-slate-500 mt-0.5 leading-tight">Dodos restants</p>
             </div>
           </div>
@@ -144,22 +169,15 @@
         <!-- Personal Goal Gauge -->
         <div class="px-5 mt-3">
           <div onclick="openCustomObjectiveModal()" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition cursor-pointer group">
-            <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg group-hover:rotate-6 transition">
-                  <i class="fas fa-gift" id="objective-card-icon"></i>
-                </div>
-                <div class="text-left">
-                  <div class="flex items-center gap-1.5">
-                    <h4 class="font-bold text-sm text-slate-900 leading-tight" id="objective-title-display">Cadeau pour elle</h4>
-                    <i class="fas fa-pen text-[10px] text-slate-300 group-hover:text-indigo-500 transition"></i>
-                  </div>
-                  <p class="text-xs text-slate-500 mt-0.5" id="gift-progress-text">atteint aux retrouvailles</p>
+                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg"><i class="fas fa-gift"></i></div>
+                <div>
+                  <h4 class="font-bold text-sm text-slate-900 leading-tight">🔒 Ma surprise secrète</h4>
+                  <p class="text-xs text-slate-500 mt-0.5" id="objective-title-display">Appuyer pour modifier</p>
                 </div>
               </div>
-              <div class="flex items-center gap-1.5">
-                <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
-              </div>
+              <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
             </div>
           </div>
         </div>
@@ -181,7 +199,6 @@
           </div>
         </div>
 
-        <!-- Recent Thought Feed -->
         <div class="px-5 mt-4">
           <div class="bg-blue-50/70 rounded-2xl p-4 border border-blue-100">
             <div class="flex items-center justify-between mb-1.5">
@@ -197,16 +214,13 @@
         <h2 class="text-2xl font-extrabold text-slate-900">Mon soutien</h2>
         <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-100">
           <button onclick="openMessageGeneratorModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 text-left">
-            <div class="flex items-center gap-3.5"><i class="fas fa-comment-dots text-brand-blue text-lg"></i><span class="font-semibold text-sm">Lui envoyer un message</span></div>
+            <div class="flex items-center gap-3.5"><i class="fas fa-comment-dots text-brand-blue text-lg"></i><span class="font-semibold text-sm">Générer un message</span></div>
           </button>
           <button onclick="openCallPartnerModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 text-left">
             <div class="flex items-center gap-3.5"><i class="fas fa-phone text-brand-blue text-lg"></i><span class="font-semibold text-sm">Lui téléphoner</span></div>
           </button>
           <button onclick="openBreathingModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 text-left">
             <div class="flex items-center gap-3.5"><i class="fas fa-wind text-emerald-500 text-lg"></i><span class="font-semibold text-sm">Respiration anti-stress</span></div>
-          </button>
-          <button onclick="openTeleportModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 text-left">
-            <div class="flex items-center gap-3.5"><i class="fas fa-atom text-slate-900 text-lg"></i><span class="font-semibold text-sm">Téléportation Quantique</span></div>
           </button>
         </div>
       </section>
@@ -237,31 +251,38 @@
 
       <!-- TAB PROFIL -->
       <section id="tab-profil" class="tab-content hidden p-5 space-y-4">
-        <h2 class="text-2xl font-extrabold text-slate-900">Mon Compte</h2>
+        <h2 class="text-2xl font-extrabold text-slate-900">Mon Profil Personnel</h2>
         <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-3.5">
-          <h3 class="text-sm font-bold text-slate-800">Mes Informations Personnelles</h3>
-          <input type="text" id="setting-my-name" placeholder="Mon Prénom" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
-          <input type="tel" id="setting-my-phone" placeholder="Mon Numéro de Téléphone" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
-          <button onclick="saveMyPersonalProfile()" class="w-full bg-brand-blue text-white font-bold text-xs py-3 rounded-xl shadow">Enregistrer mon profil</button>
+          <h3 class="text-sm font-bold text-slate-800">Mes Informations Privées</h3>
+          <div>
+            <label class="text-[11px] font-bold text-slate-600 block mb-1">Mon Prénom</label>
+            <input type="text" id="setting-my-name" placeholder="Votre prénom" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold">
+          </div>
+          <div>
+            <label class="text-[11px] font-bold text-slate-600 block mb-1">Mon Numéro de Téléphone</label>
+            <input type="tel" id="setting-my-phone" placeholder="06 00 00 00 00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold">
+          </div>
+          <button onclick="saveMyPersonalProfile()" class="w-full bg-brand-blue text-white font-bold text-xs py-2.5 rounded-xl shadow">Enregistrer mon profil</button>
         </div>
+
         <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-3.5">
-          <h3 class="text-sm font-bold text-slate-800">Date des Retrouvailles</h3>
-          <input type="datetime-local" id="setting-target-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
-          <button onclick="saveSharedCoupleDates()" class="w-full bg-slate-800 text-white font-bold text-xs py-3 rounded-xl shadow">Changer la date</button>
+          <h3 class="text-sm font-bold text-slate-800">Date des Retrouvailles (Partagée)</h3>
+          <input type="datetime-local" id="setting-target-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold">
+          <button onclick="saveSharedCoupleDates()" class="w-full bg-slate-800 text-white font-bold text-xs py-2.5 rounded-xl shadow">Enregistrer la date</button>
         </div>
       </section>
     </main>
 
     <!-- Floating Panic SOS -->
-    <div class="absolute bottom-20 right-4 z-40">
+    <div id="floating-sos-btn" class="absolute bottom-20 right-4 z-40 hidden">
       <button onclick="triggerPanicEmergency()" class="panic-button text-white font-bold text-xs px-4 py-3 rounded-full flex items-center gap-2 shadow-xl border-2 border-white">
         <i class="fas fa-heart-crack text-white text-base"></i>
-        <span class="block text-xs font-extrabold"><span class="partner-name-text">Lauriane</span> me manque !</span>
+        <span class="block text-xs font-extrabold">SOS Manque !</span>
       </button>
     </div>
 
-    <!-- Bottom Navigation Bar -->
-    <nav class="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200/80 px-2 py-2 flex justify-around items-center z-50">
+    <!-- Bottom Nav -->
+    <nav id="app-nav" class="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200/80 px-2 py-2 flex justify-around items-center z-50 hidden">
       <button onclick="switchTab('tab-accueil')" id="nav-tab-accueil" class="nav-btn flex flex-col items-center py-1 px-3 text-brand-blue font-bold"><i class="fas fa-house text-lg mb-0.5"></i><span class="text-[10px]">Accueil</span></button>
       <button onclick="switchTab('tab-soutien')" id="nav-tab-soutien" class="nav-btn flex flex-col items-center py-1 px-3 text-slate-400"><i class="fas fa-hand-holding-heart text-lg mb-0.5"></i><span class="text-[10px]">Soutien</span></button>
       <button onclick="switchTab('tab-photos')" id="nav-tab-photos" class="nav-btn flex flex-col items-center py-1 px-3 text-slate-400"><i class="fas fa-images text-lg mb-0.5"></i><span class="text-[10px]">Souvenirs</span></button>
@@ -269,87 +290,28 @@
       <button onclick="switchTab('tab-profil')" id="nav-tab-profil" class="nav-btn flex flex-col items-center py-1 px-3 text-slate-400"><i class="fas fa-user text-lg mb-0.5"></i><span class="text-[10px]">Compte</span></button>
     </nav>
 
-    <!-- ALL MODALS -->
-    <!-- Modal Switch User -->
-    <div id="modal-user-switch" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-      <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl relative text-center">
-        <h3 class="text-base font-extrabold text-slate-900 mb-2">Espace de Connexion</h3>
-        <p class="text-xs text-slate-500 mb-4">Choisir l'utilisateur actif sur ce téléphone :</p>
-        <div class="space-y-2.5 mb-4 text-left">
-          <button onclick="bindDeviceToAccount('user1')" class="w-full p-3.5 rounded-2xl border-2 border-brand-blue bg-blue-50/50">
-            <span class="text-xs font-bold text-slate-900">Compte de Ben</span>
-          </button>
-          <button onclick="bindDeviceToAccount('user2')" class="w-full p-3.5 rounded-2xl border-2 border-slate-200">
-            <span class="text-xs font-bold text-slate-900">Compte de Lauriane</span>
-          </button>
-        </div>
-        <button onclick="closeModal('modal-user-switch')" class="text-xs text-slate-400">Fermer</button>
-      </div>
-    </div>
-
-    <!-- Modal Direct Call -->
+    <!-- MODALS -->
     <div id="modal-call-partner" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-      <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl relative text-center">
-        <h3 class="text-base font-extrabold text-slate-900 mb-2">Appeler <span class="partner-name-text">Lauriane</span></h3>
-        <div class="space-y-2.5 text-left mb-4">
-          <button onclick="triggerDirectPhoneCall()" class="w-full p-3 bg-blue-50 border border-blue-100 rounded-2xl font-bold text-xs text-slate-800">Appel classique (GSM)</button>
-          <button onclick="triggerWhatsAppCall()" class="w-full p-3 bg-emerald-50 border border-emerald-100 rounded-2xl font-bold text-xs text-slate-800">WhatsApp Audio</button>
-          <button onclick="triggerFaceTimeCall()" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs text-slate-800">FaceTime / Vidéo</button>
-        </div>
+      <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl text-center">
+        <h3 class="text-base font-extrabold text-slate-900 mb-3">Lancer un appel</h3>
+        <button onclick="triggerDirectPhoneCall()" class="w-full p-3 bg-blue-50 text-slate-800 font-bold text-xs rounded-2xl mb-2">Appel classique</button>
+        <button onclick="triggerWhatsAppCall()" class="w-full p-3 bg-emerald-50 text-slate-800 font-bold text-xs rounded-2xl mb-3">WhatsApp Audio</button>
         <button onclick="closeModal('modal-call-partner')" class="text-xs text-slate-400">Annuler</button>
       </div>
     </div>
 
-    <!-- Modal Panic SOS -->
     <div id="modal-panic" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-      <div class="bg-white w-full max-w-xs rounded-3xl p-5 text-center shadow-2xl relative">
-        <h3 class="text-lg font-extrabold text-slate-900">Respirez doucement 💖</h3>
-        <p class="text-xs text-slate-600 mt-2 leading-relaxed">Ce manque est la preuve de votre amour.</p>
-        <button onclick="closeModal('modal-panic')" class="w-full bg-brand-blue text-white font-bold text-xs py-2 rounded-xl mt-4">Fermer</button>
+      <div class="bg-white w-full max-w-xs rounded-3xl p-5 text-center shadow-2xl">
+        <h3 class="text-lg font-extrabold text-slate-900 mb-2">Respirez doucement 💖</h3>
+        <p class="text-xs text-slate-600 mb-4">Ce manque prouve la force de votre amour.</p>
+        <button onclick="closeModal('modal-panic')" class="w-full bg-brand-blue text-white font-bold text-xs py-2 rounded-xl">Fermer</button>
       </div>
     </div>
 
-    <!-- Modal Message Generator -->
-    <div id="modal-message" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-      <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl text-center">
-        <h3 class="text-base font-extrabold text-slate-900 mb-2">Message Prêt-à-Envoyer</h3>
-        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs italic text-slate-700 mb-4" id="generated-msg-text">"Tu me manques fort !"</div>
-        <div class="flex gap-2">
-          <button onclick="generateRandomSweetMessage()" class="flex-1 bg-slate-100 text-xs py-2 rounded-xl">Autre</button>
-          <button onclick="copyGeneratedMessage()" class="flex-1 bg-brand-blue text-white text-xs font-bold py-2 rounded-xl">Copier</button>
-        </div>
-        <button onclick="closeModal('modal-message')" class="mt-3 text-xs text-slate-400">Fermer</button>
-      </div>
-    </div>
-
-    <!-- Modal Breathing Anti-Stress -->
-    <div id="modal-breathing" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
-      <div class="bg-white w-full max-w-xs rounded-3xl p-6 text-center shadow-2xl relative">
-        <h3 class="text-base font-extrabold text-slate-900 mb-1">Apaiser le cœur 🫁</h3>
-        <p class="text-xs text-slate-500 mb-6">Suivez le rythme de la bulle.</p>
-        <div class="w-28 h-28 mx-auto rounded-full bg-gradient-to-tr from-brand-blue to-sky-300 flex items-center justify-center text-white font-bold text-xs shadow-lg transition-all duration-[4000ms] transform scale-75" id="breathing-circle">
-          <span id="breathing-text">Inspirez...</span>
-        </div>
-        <button onclick="startBreathingCycle()" class="mt-6 w-full bg-brand-blue text-white text-xs font-bold py-2.5 rounded-xl">Lancer l'exercice</button>
-        <button onclick="closeModal('modal-breathing')" class="mt-2 text-xs text-slate-400">Fermer</button>
-      </div>
-    </div>
-
-    <!-- Modal Teleportation -->
-    <div id="modal-teleport" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
-      <div class="bg-slate-900 border border-slate-800 text-white w-full max-w-xs rounded-3xl p-5 shadow-2xl text-center">
-        <h3 class="text-base font-extrabold text-white mb-2">Téléportation Quantique</h3>
-        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 font-mono text-[10px] text-cyan-400 mb-4 h-20 overflow-y-auto" id="teleport-terminal">> Initialisé...</div>
-        <button onclick="runTeleportSequence()" class="w-full bg-cyan-500 text-slate-900 text-xs font-bold py-2.5 rounded-xl mb-2">Amorcer</button>
-        <button onclick="closeModal('modal-teleport')" class="text-xs text-slate-400">Annuler</button>
-      </div>
-    </div>
-
-    <!-- Modal Add Thought -->
     <div id="modal-thought" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
       <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl">
         <h3 class="text-base font-extrabold text-slate-900 mb-2">Noter une pensée</h3>
-        <textarea id="thought-input-text" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs" rows="3" placeholder="Ce qui me fait penser à elle..."></textarea>
+        <textarea id="thought-input-text" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs" rows="3" placeholder="Votre pensée..."></textarea>
         <div class="flex gap-2 mt-3">
           <button onclick="closeModal('modal-thought')" class="flex-1 bg-slate-100 text-xs py-2 rounded-xl">Annuler</button>
           <button onclick="saveNewThought()" class="flex-1 bg-brand-blue text-white text-xs font-bold py-2 rounded-xl">Enregistrer</button>
@@ -357,17 +319,11 @@
       </div>
     </div>
 
-    <!-- Modal Add Memory Photo -->
     <div id="modal-memory" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
       <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl">
         <h3 class="text-base font-extrabold text-slate-900 mb-2">Nouveau souvenir</h3>
-        <input type="file" id="memory-file-input" accept="image/*" class="hidden" onchange="handleMemoryImageSelect(event)">
-        <div onclick="document.getElementById('memory-file-input').click()" class="border-2 border-dashed border-slate-300 rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer bg-slate-50 mb-3 relative overflow-hidden min-h-[100px]">
-          <span class="text-xs font-bold text-slate-700">Choisir une photo</span>
-          <img id="upload-preview-img" src="" class="absolute inset-0 w-full h-full object-cover hidden">
-        </div>
-        <input type="text" id="memory-title-input" placeholder="Titre" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs mb-2">
-        <input type="text" id="memory-subtitle-input" placeholder="Sous-titre" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs mb-3">
+        <input type="text" id="memory-title-input" placeholder="Titre du souvenir" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs mb-2">
+        <input type="text" id="memory-subtitle-input" placeholder="Petit mot..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs mb-3">
         <div class="flex gap-2">
           <button onclick="closeModal('modal-memory')" class="flex-1 bg-slate-100 text-xs py-2 rounded-xl">Annuler</button>
           <button onclick="saveNewMemory()" class="flex-1 bg-brand-blue text-white text-xs font-bold py-2 rounded-xl">Ajouter</button>
@@ -375,10 +331,9 @@
       </div>
     </div>
 
-    <!-- Modal Bucket List / Reunion Projects -->
     <div id="modal-reunion-projects" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
       <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl">
-        <h3 class="text-base font-extrabold text-slate-900 mb-2">Projets de retrouvailles 🎉</h3>
+        <h3 class="text-base font-extrabold text-slate-900 mb-2">Projets du couple 🎉</h3>
         <div class="space-y-2 max-h-48 overflow-y-auto mb-3" id="reunion-projects-list"></div>
         <div class="flex gap-2">
           <input type="text" id="new-project-input" placeholder="Nouvelle idée..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs">
@@ -388,143 +343,39 @@
       </div>
     </div>
 
-    <!-- Modal Custom Objective -->
     <div id="modal-custom-objective" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
       <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl">
-        <h3 class="text-base font-extrabold text-slate-900 mb-2">Objectif Retrouvailles</h3>
-        <input type="text" id="modal-objective-title-input" placeholder="Ex: Cadeau pour elle" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs mb-3">
+        <h3 class="text-base font-extrabold text-slate-900 mb-1">Surprise secrète 🤫</h3>
+        <p class="text-[11px] text-slate-500 mb-3">Cette surprise reste privée sur votre compte.</p>
+        <input type="text" id="modal-objective-title-input" placeholder="Ex: Cadeau réservé..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs mb-3">
         <button onclick="saveCustomObjective()" class="w-full bg-brand-blue text-white font-bold text-xs py-2.5 rounded-xl">Enregistrer</button>
         <button onclick="closeModal('modal-custom-objective')" class="w-full text-slate-400 text-xs mt-2">Annuler</button>
       </div>
     </div>
 
-    <!-- Lightbox Photo -->
-    <div id="modal-photo-viewer" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col justify-between p-4 z-50 hidden" onclick="closeModal('modal-photo-viewer')">
-      <div class="flex justify-between items-center text-white pt-2"><span id="viewer-photo-title" class="text-xs font-bold">Photo</span></div>
-      <div class="flex-1 flex items-center justify-center my-4"><img id="viewer-photo-img" src="" class="max-h-[70vh] rounded-2xl object-contain"></div>
-      <p id="viewer-photo-sub" class="text-center text-xs text-slate-300"></p>
+    <div id="modal-message" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl text-center">
+        <h3 class="text-base font-extrabold text-slate-900 mb-2">Mot doux</h3>
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs italic text-slate-700 mb-4" id="generated-msg-text">"Tu me manques fort !"</div>
+        <button onclick="closeModal('modal-message')" class="w-full bg-brand-blue text-white font-bold text-xs py-2 rounded-xl">Fermer</button>
+      </div>
+    </div>
+
+    <div id="modal-breathing" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-white w-full max-w-xs rounded-3xl p-6 text-center shadow-2xl">
+        <h3 class="text-base font-extrabold text-slate-900 mb-4">Apaiser le cœur 🫁</h3>
+        <div class="w-24 h-24 mx-auto rounded-full bg-brand-blue text-white flex items-center justify-center font-bold text-xs transition-all duration-1000 transform" id="breathing-circle">Inspirez...</div>
+        <button onclick="closeModal('modal-breathing')" class="mt-6 w-full text-xs text-slate-400">Fermer</button>
+      </div>
     </div>
 
   </div>
 
-  <!-- JAVASCRIPT GLOBAL INITIALIZATION -->
-  <script>
-    // Global Application State & Helper functions
-    window.appState = {
-      coupleRoomCode: "COUPLE-2026",
-      currentUserId: localStorage.getItem('love_tracker_device_account') || "user1",
-      users: {
-        user1: { name: "Ben", phone: "06 12 34 56 78", secretObjective: "Surprise pour elle" },
-        user2: { name: "Lauriane", phone: "06 98 76 54 32", secretObjective: "Album photo" }
-      },
-      targetDate: new Date(Date.now() + 2*24*60*60*1000).toISOString(),
-      thoughts: [],
-      memories: [],
-      reunionProjects: []
-    };
-
-    window.switchTab = function(id) {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-      const target = document.getElementById(id);
-      if (target) target.classList.remove('hidden');
-    };
-
-    window.closeModal = function(id) {
-      const modal = document.getElementById(id);
-      if (modal) modal.classList.add('hidden');
-    };
-
-    window.openAccountAuthModal = function() { document.getElementById('modal-user-switch').classList.remove('hidden'); };
-    window.openCallPartnerModal = function() { document.getElementById('modal-call-partner').classList.remove('hidden'); };
-    window.openThoughtModal = function() { document.getElementById('modal-thought').classList.remove('hidden'); };
-    window.openAddMemoryModal = function() { document.getElementById('modal-memory').classList.remove('hidden'); };
-    window.openReunionProjectsModal = function() { document.getElementById('modal-reunion-projects').classList.remove('hidden'); };
-    window.openCustomObjectiveModal = function() { document.getElementById('modal-custom-objective').classList.remove('hidden'); };
-    window.openMessageGeneratorModal = function() { document.getElementById('modal-message').classList.remove('hidden'); };
-    window.openBreathingModal = function() { document.getElementById('modal-breathing').classList.remove('hidden'); };
-    window.openTeleportModal = function() { document.getElementById('modal-teleport').classList.remove('hidden'); };
-
-    window.bindDeviceToAccount = function(uId) {
-      window.appState.currentUserId = uId;
-      localStorage.setItem('love_tracker_device_account', uId);
-      if (window.refreshInterfaceForActiveUser) window.refreshInterfaceForActiveUser();
-      window.closeModal('modal-user-switch');
-    };
-
-    window.handleMemoryImageSelect = function(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        window.currentBase64Img = evt.target.result;
-        const imgEl = document.getElementById('upload-preview-img');
-        if (imgEl) {
-          imgEl.src = evt.target.result;
-          imgEl.classList.remove('hidden');
-        }
-      };
-      reader.readAsDataURL(file);
-    };
-
-    window.triggerPanicEmergency = function() {
-      try { confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } }); } catch(err){}
-      document.getElementById('modal-panic').classList.remove('hidden');
-    };
-
-    window.triggerDirectPhoneCall = function() {
-      const partnerId = window.appState.currentUserId === 'user1' ? 'user2' : 'user1';
-      const phone = window.appState.users[partnerId]?.phone;
-      if (phone) window.location.href = `tel:${phone}`;
-    };
-
-    window.triggerWhatsAppCall = function() {
-      const partnerId = window.appState.currentUserId === 'user1' ? 'user2' : 'user1';
-      const phone = window.appState.users[partnerId]?.phone;
-      if (phone) window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}`, '_blank');
-    };
-
-    window.triggerFaceTimeCall = function() {
-      const partnerId = window.appState.currentUserId === 'user1' ? 'user2' : 'user1';
-      const phone = window.appState.users[partnerId]?.phone;
-      if (phone) window.location.href = `facetime:${phone}`;
-    };
-
-    window.generateRandomSweetMessage = function() {
-      const msgs = ["Tu me manques un peu plus chaque jour !", "Hâte de te revoir mon amour !", "Compter les dodos est mon moment préféré !"];
-      document.getElementById('generated-msg-text').innerText = msgs[Math.floor(Math.random() * msgs.length)];
-    };
-
-    window.copyGeneratedMessage = function() {
-      navigator.clipboard.writeText(document.getElementById('generated-msg-text').innerText);
-      alert("Message copié !");
-    };
-
-    window.startBreathingCycle = function() {
-      const circle = document.getElementById('breathing-circle');
-      const text = document.getElementById('breathing-text');
-      if (circle && text) {
-        circle.classList.toggle('scale-125');
-        text.innerText = circle.classList.contains('scale-125') ? "Expirez..." : "Inspirez...";
-      }
-    };
-
-    window.runTeleportSequence = function() {
-      const term = document.getElementById('teleport-terminal');
-      if (term) term.innerText = "> Calcul des coordonnées...\n> Erreur 404 : Amour trop fort ! Appel recommandé !";
-    };
-
-    window.openPhotoViewer = function(img, title, sub) {
-      document.getElementById('viewer-photo-img').src = img;
-      document.getElementById('viewer-photo-title').innerText = title;
-      document.getElementById('viewer-photo-sub').innerText = sub;
-      document.getElementById('modal-photo-viewer').classList.remove('hidden');
-    };
-  </script>
-
-  <!-- FIREBASE APPLICATION ENGINE -->
+  <!-- FIREBASE AUTH & FIRESTORE ENGINE -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCMVojNde1zUs8pNn7Lkw5oxZb2hbhGAq0",
@@ -536,54 +387,151 @@
     };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getFirestore(app);
-    const roomRef = doc(db, "couples", window.appState.coupleRoomCode);
 
-    onSnapshot(roomRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.data();
-        if (data.thoughts) window.appState.thoughts = data.thoughts;
-        if (data.memories) window.appState.memories = data.memories;
-        if (data.reunionProjects) window.appState.reunionProjects = data.reunionProjects;
-        if (data.users) window.appState.users = data.users;
-        if (data.targetDate) window.appState.targetDate = data.targetDate;
+    const COUPLE_ROOM_ID = "COUPLE-2026";
+    let currentUser = null;
 
-        window.renderThoughtsList();
-        window.renderMemoriesGrid();
-        window.renderReunionProjects();
-        window.refreshInterfaceForActiveUser();
+    // État global
+    window.appState = {
+      userProfile: { name: "", phone: "", secretObjective: "" },
+      sharedData: {
+        targetDate: new Date(Date.now() + 2*24*60*60*1000).toISOString(),
+        thoughts: [],
+        memories: [],
+        reunionProjects: []
+      }
+    };
+
+    // Authentification listener
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('app-container').classList.remove('hidden');
+        document.getElementById('app-nav').classList.remove('hidden');
+        document.getElementById('floating-sos-btn').classList.remove('hidden');
+
+        // Charger profil privé
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          window.appState.userProfile = userDoc.data();
+        } else {
+          window.appState.userProfile = { name: user.email.split('@')[0], phone: "", secretObjective: "" };
+        }
+
+        // Ecouter les données partagées
+        onSnapshot(doc(db, "couples", COUPLE_ROOM_ID), (snapshot) => {
+          if (snapshot.exists()) {
+            window.appState.sharedData = snapshot.data();
+            window.renderSharedContent();
+          }
+        });
+
+        window.renderUserProfile();
+      } else {
+        currentUser = null;
+        document.getElementById('auth-screen').classList.remove('hidden');
+        document.getElementById('app-container').classList.add('hidden');
+        document.getElementById('app-nav').classList.add('hidden');
+        document.getElementById('floating-sos-btn').classList.add('hidden');
       }
     });
 
-    window.saveStateToFirebase = async () => {
-      await setDoc(roomRef, {
-        thoughts: window.appState.thoughts,
-        memories: window.appState.memories,
-        reunionProjects: window.appState.reunionProjects,
-        users: window.appState.users,
-        targetDate: window.appState.targetDate,
-        updatedAt: Date.now()
-      }, { merge: true });
+    // Fonctions Auth
+    window.loginUser = async () => {
+      const email = document.getElementById('auth-email').value;
+      const pass = document.getElementById('auth-password').value;
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+      } catch (err) {
+        showAuthError("Erreur : " + err.message);
+      }
     };
 
-    window.refreshInterfaceForActiveUser = () => {
-      const uId = window.appState.currentUserId;
-      const me = window.appState.users[uId] || window.appState.users.user1;
-      const partnerId = uId === 'user1' ? 'user2' : 'user1';
-      const partner = window.appState.users[partnerId] || window.appState.users.user2;
-
-      document.getElementById('my-name-pill').innerText = `Compte : ${me.name}`;
-      document.getElementById('objective-title-display').innerText = me.secretObjective || "Surprise";
-
-      document.querySelectorAll('.partner-name-text').forEach(el => el.innerText = partner.name);
-      window.updateAllCalculations();
+    window.registerUser = async () => {
+      const email = document.getElementById('auth-email').value;
+      const pass = document.getElementById('auth-password').value;
+      try {
+        const res = await createUserWithEmailAndPassword(auth, email, pass);
+        await setDoc(doc(db, "users", res.user.uid), {
+          name: email.split('@')[0],
+          phone: "",
+          secretObjective: ""
+        });
+      } catch (err) {
+        showAuthError("Erreur : " + err.message);
+      }
     };
 
-    window.updateAllCalculations = () => {
-      const now = new Date().getTime();
-      const target = new Date(window.appState.targetDate).getTime();
-      const diff = Math.max(0, target - now);
+    window.logoutUser = () => signOut(auth);
 
+    function showAuthError(msg) {
+      const el = document.getElementById('auth-error-msg');
+      el.innerText = msg;
+      el.classList.remove('hidden');
+    }
+
+    // Sauvegardes Firestore
+    window.savePrivateProfile = async () => {
+      if (!currentUser) return;
+      await setDoc(doc(db, "users", currentUser.uid), window.appState.userProfile, { merge: true });
+    };
+
+    window.saveSharedData = async () => {
+      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), window.appState.sharedData, { merge: true });
+    };
+
+    // Rendu Interface
+    window.renderUserProfile = () => {
+      const p = window.appState.userProfile;
+      document.getElementById('my-name-pill').innerText = `Compte : ${p.name || 'Inconnu'}`;
+      document.getElementById('setting-my-name').value = p.name || '';
+      document.getElementById('setting-my-phone').value = p.phone || '';
+      document.getElementById('objective-title-display').innerText = p.secretObjective || 'Ajouter une surprise...';
+      document.getElementById('modal-objective-title-input').value = p.secretObjective || '';
+    };
+
+    window.renderSharedContent = () => {
+      const s = window.appState.sharedData;
+      
+      // Pensées
+      const thoughtsList = document.getElementById('thoughts-list');
+      thoughtsList.innerHTML = '';
+      if (s.thoughts && s.thoughts.length > 0) {
+        document.getElementById('latest-thought-text').innerText = `"${s.thoughts[0].text}"`;
+        document.getElementById('latest-thought-author-badge').innerText = `Pensée de ${s.thoughts[0].author}`;
+        s.thoughts.forEach(t => {
+          thoughtsList.innerHTML += `<div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm"><span class="text-[10px] font-bold text-brand-blue uppercase">${t.author}</span><p class="text-xs text-slate-700 italic mt-0.5">"${t.text}"</p></div>`;
+        });
+      }
+
+      // Souvenirs
+      const gallery = document.getElementById('gallery-grid');
+      gallery.innerHTML = '';
+      if (s.memories) {
+        s.memories.forEach(m => {
+          gallery.innerHTML += `<div class="bg-white rounded-2xl border p-2 shadow-sm"><h4 class="font-bold text-xs text-slate-800">${m.title}</h4><p class="text-[10px] text-slate-400">${m.sub}</p><span class="text-[9px] text-brand-blue font-bold">Par ${m.author}</span></div>`;
+        });
+      }
+
+      // Projets
+      const projects = document.getElementById('reunion-projects-list');
+      projects.innerHTML = '';
+      if (s.reunionProjects) {
+        document.getElementById('stat-projects-count').innerText = s.reunionProjects.length;
+        s.reunionProjects.forEach(p => {
+          projects.innerHTML += `<div class="p-2.5 bg-slate-50 border rounded-xl text-xs flex justify-between"><span>${p.text}</span><span class="text-[9px] font-bold text-slate-400">${p.author}</span></div>`;
+        });
+      }
+
+      window.updateCountdown();
+    };
+
+    window.updateCountdown = () => {
+      const target = new Date(window.appState.sharedData.targetDate || Date.now()).getTime();
+      const diff = Math.max(0, target - new Date().getTime());
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -593,110 +541,95 @@
       document.getElementById('cd-hours').innerText = String(hours).padStart(2, '0');
       document.getElementById('cd-mins').innerText = String(mins).padStart(2, '0');
       document.getElementById('cd-secs').innerText = String(secs).padStart(2, '0');
-
       document.getElementById('stat-dodos').innerText = days;
       document.getElementById('dodos-badge').innerText = `${days} dodos`;
       document.getElementById('sleeps-summary').innerText = `Plus que ${days} dodo${days > 1 ? 's' : ''} ! 🌙`;
     };
 
-    setInterval(window.updateAllCalculations, 1000);
+    setInterval(window.updateCountdown, 1000);
 
-    window.renderThoughtsList = () => {
-      const container = document.getElementById('thoughts-list');
-      if (!container) return;
-      container.innerHTML = "";
-      if (window.appState.thoughts.length > 0) {
-        document.getElementById('latest-thought-text').innerText = `"${window.appState.thoughts[0].text}"`;
-        document.getElementById('latest-thought-author-badge').innerText = `Pensée de ${window.appState.thoughts[0].author}`;
-      }
-      window.appState.thoughts.forEach(t => {
-        container.innerHTML += `
-          <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
-            <span class="text-[10px] font-bold text-brand-blue uppercase">${t.author}</span>
-            <p class="text-xs text-slate-700 italic mt-0.5">"${t.text}"</p>
-          </div>`;
-      });
-    };
-
-    window.renderMemoriesGrid = () => {
-      const container = document.getElementById('gallery-grid');
-      if (!container) return;
-      container.innerHTML = "";
-      window.appState.memories.forEach(m => {
-        container.innerHTML += `
-          <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 p-2 shadow-sm cursor-pointer" onclick="openPhotoViewer('${m.img}', '${m.title}', '${m.sub}')">
-            <img src="${m.img}" class="h-24 w-full object-cover rounded-xl mb-1">
-            <h4 class="font-bold text-xs text-slate-800 truncate">${m.title}</h4>
-            <span class="text-[9px] text-brand-blue font-bold">Par ${m.author}</span>
-          </div>`;
-      });
-    };
-
-    window.renderReunionProjects = () => {
-      const container = document.getElementById('reunion-projects-list');
-      if (!container) return;
-      container.innerHTML = "";
-      document.getElementById('stat-projects-count').innerText = window.appState.reunionProjects.length;
-      window.appState.reunionProjects.forEach(p => {
-        container.innerHTML += `
-          <div class="p-2.5 bg-slate-50 border rounded-xl text-xs flex justify-between items-center">
-            <span>${p.text}</span>
-            <span class="text-[9px] font-bold text-slate-400">${p.author}</span>
-          </div>`;
-      });
-    };
-
+    // Handlers d'actions
     window.saveNewThought = () => {
-      const txt = document.getElementById('thought-input-text').value.trim();
-      if (!txt) return;
-      const me = window.appState.users[window.appState.currentUserId]?.name || "Ben";
-      window.appState.thoughts.unshift({ text: txt, author: me });
-      window.saveStateToFirebase();
-      document.getElementById('thought-input-text').value = "";
+      const input = document.getElementById('thought-input-text');
+      if (!input.value.trim()) return;
+      if (!window.appState.sharedData.thoughts) window.appState.sharedData.thoughts = [];
+      window.appState.sharedData.thoughts.unshift({
+        text: input.value.trim(),
+        author: window.appState.userProfile.name || 'Moi'
+      });
+      window.saveSharedData();
+      input.value = '';
       window.closeModal('modal-thought');
     };
 
     window.saveNewMemory = () => {
-      const title = document.getElementById('memory-title-input').value.trim() || "Souvenir";
-      const sub = document.getElementById('memory-subtitle-input').value.trim() || "Ensemble";
-      const img = window.currentBase64Img || "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=400&q=80";
-      const me = window.appState.users[window.appState.currentUserId]?.name || "Ben";
-
-      window.appState.memories.unshift({ title, sub, img, author: me });
-      window.saveStateToFirebase();
+      const title = document.getElementById('memory-title-input').value.trim();
+      const sub = document.getElementById('memory-subtitle-input').value.trim();
+      if (!title) return;
+      if (!window.appState.sharedData.memories) window.appState.sharedData.memories = [];
+      window.appState.sharedData.memories.unshift({
+        title, sub, author: window.appState.userProfile.name || 'Moi'
+      });
+      window.saveSharedData();
       window.closeModal('modal-memory');
     };
 
     window.addNewReunionProject = () => {
       const input = document.getElementById('new-project-input');
       if (!input.value.trim()) return;
-      const me = window.appState.users[window.appState.currentUserId]?.name || "Ben";
-      window.appState.reunionProjects.push({ text: input.value.trim(), author: me });
-      window.saveStateToFirebase();
-      input.value = "";
+      if (!window.appState.sharedData.reunionProjects) window.appState.sharedData.reunionProjects = [];
+      window.appState.sharedData.reunionProjects.push({
+        text: input.value.trim(),
+        author: window.appState.userProfile.name || 'Moi'
+      });
+      window.saveSharedData();
+      input.value = '';
     };
 
     window.saveCustomObjective = () => {
       const val = document.getElementById('modal-objective-title-input').value.trim();
-      if (val) {
-        window.appState.users[window.appState.currentUserId].secretObjective = val;
-        window.saveStateToFirebase();
-        window.closeModal('modal-custom-objective');
-      }
+      window.appState.userProfile.secretObjective = val;
+      window.savePrivateProfile();
+      window.renderUserProfile();
+      window.closeModal('modal-custom-objective');
     };
 
     window.saveMyPersonalProfile = () => {
-      const name = document.getElementById('setting-my-name').value.trim();
-      const phone = document.getElementById('setting-my-phone').value.trim();
-      if (name) window.appState.users[window.appState.currentUserId].name = name;
-      if (phone) window.appState.users[window.appState.currentUserId].phone = phone;
-      window.saveStateToFirebase();
+      window.appState.userProfile.name = document.getElementById('setting-my-name').value.trim();
+      window.appState.userProfile.phone = document.getElementById('setting-my-phone').value.trim();
+      window.savePrivateProfile();
+      window.renderUserProfile();
     };
 
     window.saveSharedCoupleDates = () => {
-      const t = document.getElementById('setting-target-date').value;
-      if (t) window.appState.targetDate = t;
-      window.saveStateToFirebase();
+      const val = document.getElementById('setting-target-date').value;
+      if (val) {
+        window.appState.sharedData.targetDate = val;
+        window.saveSharedData();
+      }
+    };
+
+    // UI Helpers
+    window.switchTab = (id) => {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+    };
+    window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+    window.openThoughtModal = () => document.getElementById('modal-thought').classList.remove('hidden');
+    window.openAddMemoryModal = () => document.getElementById('modal-memory').classList.remove('hidden');
+    window.openReunionProjectsModal = () => document.getElementById('modal-reunion-projects').classList.remove('hidden');
+    window.openCustomObjectiveModal = () => document.getElementById('modal-custom-objective').classList.remove('hidden');
+    window.openCallPartnerModal = () => document.getElementById('modal-call-partner').classList.remove('hidden');
+    window.openMessageGeneratorModal = () => document.getElementById('modal-message').classList.remove('hidden');
+    window.openBreathingModal = () => document.getElementById('modal-breathing').classList.remove('hidden');
+    window.triggerPanicEmergency = () => document.getElementById('modal-panic').classList.remove('hidden');
+    window.triggerDirectPhoneCall = () => {
+      const phone = window.appState.userProfile.phone;
+      if (phone) window.location.href = `tel:${phone}`;
+    };
+    window.triggerWhatsAppCall = () => {
+      const phone = window.appState.userProfile.phone;
+      if (phone) window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}`, '_blank');
     };
   </script>
 </body>
