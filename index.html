@@ -83,7 +83,7 @@
         <div class="bg-brand-blue text-white pt-6 pb-14 px-6 rounded-b-[36px] relative shadow-md">
           <div class="flex justify-between items-center mb-3">
             <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md pl-1.5 pr-3 py-1 rounded-full text-[11px] font-bold text-white border border-white/20">
-              <span class="w-5 h-5 rounded-full bg-white text-brand-blue flex items-center justify-center text-xs shadow-sm">👦</span>
+              <span id="user-avatar-badge" class="w-5 h-5 rounded-full bg-white text-brand-blue flex items-center justify-center text-xs shadow-sm">👤</span>
               <span class="truncate max-w-[120px]" id="my-name-pill">Compte</span>
             </div>
 
@@ -97,8 +97,8 @@
               <span>Espace connecté & sécurisé</span>
               <i class="fas fa-lock text-rose-300 text-[9px]"></i>
             </span>
-            <h1 class="text-3xl font-extrabold tracking-tight mt-0.5">
-              Gestion du Manque
+            <h1 class="text-3xl font-extrabold tracking-tight mt-0.5" id="main-partner-title">
+              Le manque de <span id="header-partner-name">l'autre</span>
             </h1>
           </div>
 
@@ -170,11 +170,13 @@
         <h2 class="text-2xl font-extrabold text-slate-900">Mon soutien</h2>
         <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-100">
           <button onclick="openMessageGeneratorModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 text-left">
-            <div class="flex items-center gap-3.5"><i class="fas fa-comment-dots text-brand-blue text-lg"></i><span class="font-semibold text-sm">Générer un message</span></div>
+            <div class="flex items-center gap-3.5"><i class="fas fa-comment-dots text-brand-blue text-lg"></i><span class="font-semibold text-sm">Générer un message mignon</span></div>
+            <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
           </button>
 
           <button onclick="openCallPartnerModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 text-left">
             <div class="flex items-center gap-3.5"><i class="fas fa-phone text-brand-blue text-lg"></i><span class="font-semibold text-sm">Lui téléphoner</span></div>
+            <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
           </button>
 
           <button onclick="openTeleportModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 text-left bg-gradient-to-r from-cyan-50/50 to-blue-50/50">
@@ -207,7 +209,6 @@
           </button>
         </div>
 
-        <!-- GRILLE DE PHOTOS -->
         <div class="grid grid-cols-2 gap-3" id="gallery-grid"></div>
 
         <div class="pt-4 border-t border-slate-200">
@@ -216,14 +217,13 @@
         </div>
       </section>
 
-      <!-- TAB CALENDRIER REDESIGNÉ -->
+      <!-- TAB CALENDRIER -->
       <section id="tab-calendrier" class="tab-content hidden p-5 space-y-5">
         <div class="pt-2">
           <h2 class="text-2xl font-extrabold text-slate-900">Suivi des Retrouvailles</h2>
           <p class="text-xs text-slate-500">Visualisez votre progression jusqu'au Jour J</p>
         </div>
 
-        <!-- Carte Timeline d'avancement -->
         <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-4">
           <div class="flex justify-between items-center">
             <h3 class="font-bold text-sm text-slate-800">Progression globale</h3>
@@ -240,27 +240,23 @@
           </div>
         </div>
 
-        <!-- Grille visuelle des Dodos -->
         <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm">
           <div class="flex justify-between items-center mb-4">
             <h3 class="font-bold text-sm text-slate-800">Calendrier des dodos</h3>
             <span id="dodos-badge" class="text-xs font-extrabold bg-amber-50 text-amber-600 px-2.5 py-1 rounded-full">0 dodos</span>
           </div>
 
-          <div id="dodos-cards-grid" class="grid grid-cols-4 gap-2 text-center">
-            <!-- Généré dynamiquement -->
-          </div>
+          <div id="dodos-cards-grid" class="grid grid-cols-4 gap-2 text-center"></div>
         </div>
       </section>
 
-      <!-- TAB PROFIL (REPENSER ET SÉCURISÉ) -->
+      <!-- TAB PROFIL -->
       <section id="tab-profil" class="tab-content hidden p-5 space-y-5">
         <div class="pt-2">
           <h2 class="text-2xl font-extrabold text-slate-900">Mon Compte</h2>
           <p class="text-xs text-slate-500">Gérez vos infos et la date du couple</p>
         </div>
 
-        <!-- Carte Profil Perso -->
         <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-4">
           <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
             <div class="w-8 h-8 rounded-xl bg-blue-50 text-brand-blue flex items-center justify-center text-sm font-bold">👤</div>
@@ -282,7 +278,6 @@
           </button>
         </div>
 
-        <!-- Carte Date du Couple -->
         <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-4">
           <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
             <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm font-bold">🗓️</div>
@@ -301,16 +296,68 @@
       </section>
     </main>
 
-    <!-- Bottom Nav -->
+    <!-- Navigation Bar en bas avec couleurs dynamiques -->
     <nav id="app-nav" class="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200/80 px-2 py-2 flex justify-around items-center z-50 hidden">
-      <button onclick="switchTab('tab-accueil')" id="nav-tab-accueil" class="nav-btn flex flex-col items-center py-1 px-3 text-brand-blue font-bold"><i class="fas fa-house text-lg mb-0.5"></i><span class="text-[10px]">Accueil</span></button>
-      <button onclick="switchTab('tab-soutien')" id="nav-tab-soutien" class="nav-btn flex flex-col items-center py-1 px-3 text-slate-400"><i class="fas fa-hand-holding-heart text-lg mb-0.5"></i><span class="text-[10px]">Soutien</span></button>
-      <button onclick="switchTab('tab-photos')" id="nav-tab-photos" class="nav-btn flex flex-col items-center py-1 px-3 text-slate-400"><i class="fas fa-images text-lg mb-0.5"></i><span class="text-[10px]">Souvenirs</span></button>
-      <button onclick="switchTab('tab-calendrier')" id="nav-tab-calendrier" class="nav-btn flex flex-col items-center py-1 px-3 text-slate-400"><i class="fas fa-calendar-days text-lg mb-0.5"></i><span class="text-[10px]">Calendrier</span></button>
-      <button onclick="switchTab('tab-profil')" id="nav-tab-profil" class="nav-btn flex flex-col items-center py-1 px-3 text-slate-400"><i class="fas fa-user text-lg mb-0.5"></i><span class="text-[10px]">Compte</span></button>
+      <button onclick="switchTab('tab-accueil')" id="nav-tab-accueil" class="nav-btn flex flex-col items-center py-1 px-3 text-brand-blue font-bold">
+        <i class="fas fa-house text-lg mb-0.5"></i>
+        <span class="text-[10px]">Accueil</span>
+      </button>
+
+      <button onclick="switchTab('tab-soutien')" id="nav-tab-soutien" class="nav-btn flex flex-col items-center py-1 px-3 text-slate-400">
+        <i class="fas fa-hand-holding-heart text-lg mb-0.5"></i>
+        <span class="text-[10px]">Soutien</span>
+      </button>
+
+      <button onclick="switchTab('tab-photos')" id="nav-tab-photos" class="nav-btn flex flex-col items-center py-1 px-3 text-slate-400">
+        <i class="fas fa-images text-lg mb-0.5"></i>
+        <span class="text-[10px]">Souvenirs</span>
+      </button>
+
+      <button onclick="switchTab('tab-calendrier')" id="nav-tab-calendrier" class="nav-btn flex flex-col items-center py-1 px-3 text-slate-400">
+        <i class="fas fa-calendar-days text-lg mb-0.5"></i>
+        <span class="text-[10px]">Calendrier</span>
+      </button>
+
+      <button onclick="switchTab('tab-profil')" id="nav-tab-profil" class="nav-btn flex flex-col items-center py-1 px-3 text-slate-400">
+        <i class="fas fa-user text-lg mb-0.5"></i>
+        <span class="text-[10px]">Compte</span>
+      </button>
     </nav>
 
     <!-- MODALS -->
+    <div id="modal-call-partner" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl text-center">
+        <h3 class="text-base font-extrabold text-slate-900 mb-1">Appeler <span id="call-modal-partner-name">l'autre</span></h3>
+        <p class="text-[11px] text-slate-400 mb-4" id="call-modal-phone-preview">Numéro : Non renseigné</p>
+
+        <div class="space-y-2 mb-4">
+          <button onclick="triggerDirectPhoneCall()" class="w-full p-3 bg-blue-50 border border-blue-100 rounded-2xl font-bold text-xs text-slate-800 flex items-center justify-between">
+            <span class="flex items-center gap-2"><i class="fas fa-phone text-brand-blue"></i> Appel classique</span>
+            <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
+          </button>
+
+          <button onclick="triggerWhatsAppCall()" class="w-full p-3 bg-emerald-50 border border-emerald-100 rounded-2xl font-bold text-xs text-slate-800 flex items-center justify-between">
+            <span class="flex items-center gap-2"><i class="fab fa-whatsapp text-emerald-600"></i> WhatsApp Audio</span>
+            <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
+          </button>
+        </div>
+
+        <button onclick="closeModal('modal-call-partner')" class="text-xs text-slate-400 font-medium">Annuler</button>
+      </div>
+    </div>
+
+    <div id="modal-message" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl text-center">
+        <h3 class="text-base font-extrabold text-slate-900 mb-2">Message Mignon</h3>
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs italic font-semibold text-slate-700 mb-4 leading-relaxed" id="generated-msg-text">"Tu me manques fort !"</div>
+        <div class="flex gap-2 mb-2">
+          <button onclick="generateRandomSweetMessage()" class="flex-1 bg-slate-100 text-xs py-2.5 rounded-xl font-bold text-slate-600">Autre</button>
+          <button onclick="copyGeneratedMessage()" class="flex-1 bg-brand-blue text-white text-xs font-bold py-2.5 rounded-xl shadow">Copier</button>
+        </div>
+        <button onclick="closeModal('modal-message')" class="text-xs text-slate-400 font-medium mt-2">Fermer</button>
+      </div>
+    </div>
+
     <div id="modal-memory" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
       <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl">
         <h3 class="text-base font-extrabold text-slate-900 mb-1">Ajouter un souvenir</h3>
@@ -331,9 +378,47 @@
       </div>
     </div>
 
+    <div id="modal-thought" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl">
+        <h3 class="text-base font-extrabold text-slate-900 mb-2">Noter une pensée</h3>
+        <textarea id="thought-input-text" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs" rows="3" placeholder="Votre pensée..."></textarea>
+        <div class="flex gap-2 mt-3">
+          <button onclick="closeModal('modal-thought')" class="flex-1 bg-slate-100 text-xs py-2 rounded-xl">Annuler</button>
+          <button onclick="saveNewThought()" class="flex-1 bg-brand-blue text-white text-xs font-bold py-2 rounded-xl">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal-reunion-projects" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl">
+        <h3 class="text-base font-extrabold text-slate-900 mb-2">Projets du couple 🎉</h3>
+        <div class="space-y-2 max-h-48 overflow-y-auto mb-3" id="reunion-projects-list"></div>
+        <div class="flex gap-2">
+          <input type="text" id="new-project-input" placeholder="Nouvelle idée..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs">
+          <button onclick="addNewReunionProject()" class="bg-amber-500 text-white font-bold px-3 py-2 rounded-xl text-xs">+</button>
+        </div>
+        <button onclick="closeModal('modal-reunion-projects')" class="w-full text-slate-400 text-xs mt-3">Fermer</button>
+      </div>
+    </div>
+
+    <div id="modal-teleport" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-slate-900 border border-slate-800 text-white w-full max-w-xs rounded-3xl p-5 shadow-2xl text-center">
+        <div class="w-14 h-14 bg-cyan-500/20 text-cyan-400 rounded-full flex items-center justify-center mx-auto text-2xl mb-3">
+          <i class="fas fa-atom animate-spin"></i>
+        </div>
+        <h3 class="text-base font-extrabold text-white mb-1">Téléportation Quantique</h3>
+        <p class="text-[11px] text-slate-400 mb-3" id="teleport-modal-status">1 crédit disponible par période de manque.</p>
+        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-left font-mono text-[10px] text-cyan-400 mb-4 h-24 overflow-y-auto" id="teleport-terminal">
+          > Système prêt.<br>> Crédit disponible : 1/1.
+        </div>
+        <button onclick="runTeleportSequence()" id="teleport-launch-btn" class="w-full bg-cyan-500 text-slate-900 text-xs font-bold py-2.5 rounded-xl shadow mb-2 hover:bg-cyan-400 transition">Lancer le transfert</button>
+        <button onclick="closeModal('modal-teleport')" class="w-full text-xs text-slate-400 py-1">Fermer</button>
+      </div>
+    </div>
+
   </div>
 
-  <!-- FIREBASE APPLICATION LOGIC -->
+  <!-- FIREBASE ENGINE & COMPLETE APPLICATION LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -357,7 +442,8 @@
     let selectedImageBase64 = null;
 
     window.appState = {
-      userProfile: { name: "", phone: "" },
+      userProfile: { name: "", phone: "", teleportUsedForTarget: "" },
+      allUsers: {},
       sharedData: { targetDate: new Date(Date.now() + 3*24*60*60*1000).toISOString(), thoughts: [], memories: [], reunionProjects: [] }
     };
 
@@ -368,17 +454,27 @@
         document.getElementById('app-container').classList.remove('hidden');
         document.getElementById('app-nav').classList.remove('hidden');
 
+        // Charger profil de l'utilisateur connecté
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
           window.appState.userProfile = userDoc.data();
         } else {
-          window.appState.userProfile = { name: user.email.split('@')[0], phone: "" };
+          window.appState.userProfile = { name: user.email.split('@')[0], phone: "", teleportUsedForTarget: "" };
         }
 
+        // Écouter les données du couple en direct
         onSnapshot(doc(db, "couples", COUPLE_ROOM_ID), (snapshot) => {
           if (snapshot.exists()) {
             window.appState.sharedData = snapshot.data();
             window.renderSharedContent();
+          }
+        });
+
+        // Écouter tous les profils utilisateurs pour récupérer les numéros et prénoms
+        onSnapshot(doc(db, "users", user.uid), (snapshot) => {
+          if (snapshot.exists()) {
+            window.appState.userProfile = snapshot.data();
+            window.renderUserProfile();
           }
         });
 
@@ -402,21 +498,28 @@
       const pass = document.getElementById('auth-password').value;
       try {
         const res = await createUserWithEmailAndPassword(auth, email, pass);
-        await setDoc(doc(db, "users", res.user.uid), { name: email.split('@')[0], phone: "" });
+        await setDoc(doc(db, "users", res.user.uid), { name: email.split('@')[0], phone: "", teleportUsedForTarget: "" });
       } catch (err) { alert(err.message); }
     };
 
     window.logoutUser = () => signOut(auth);
 
-    // SUPPRESSION PHOTO
-    window.deleteMemory = async (id) => {
-      if (!confirm("Voulez-vous vraiment supprimer ce souvenir ?")) return;
-      window.appState.sharedData.memories = window.appState.sharedData.memories.filter(m => m.id !== id);
-      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), window.appState.sharedData, { merge: true });
-      window.showToast("Photo supprimée !");
+    // DÉTERMINATION DE LA COULEUR SELON L'AUTEUR
+    window.getAuthorStyles = (authorName) => {
+      const name = (authorName || '').toLowerCase();
+      if (name.includes('lauriane')) {
+        return {
+          badge: "bg-rose-100 text-rose-700 border-rose-200",
+          border: "border-rose-200 bg-rose-50/20"
+        };
+      }
+      return {
+        badge: "bg-blue-100 text-brand-blue border-blue-200",
+        border: "border-blue-200 bg-blue-50/20"
+      };
     };
 
-    // SAUVEGARDES
+    // SAUVEGARDES ET ACTIONS
     window.saveMyPersonalProfile = async () => {
       const name = document.getElementById('setting-my-name').value.trim();
       const phone = document.getElementById('setting-my-phone').value.trim();
@@ -430,20 +533,87 @@
 
     window.saveSharedCoupleDates = async () => {
       const val = document.getElementById('setting-target-date').value;
-      if (!val) return alert("Veuillez sélectionner une date !");
+      if (!val) return alert("Veuillez choisir une date valide !");
 
-      window.appState.sharedData.targetDate = new Date(val).toISOString();
-      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), window.appState.sharedData, { merge: true });
+      const newTarget = new Date(val).toISOString();
+      window.appState.sharedData.targetDate = newTarget;
+      
+      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), { targetDate: newTarget }, { merge: true });
       window.updateCountdown();
       window.showToast("Date des retrouvailles mise à jour !");
     };
 
-    // RENDUS & UI
+    window.saveNewThought = async () => {
+      const input = document.getElementById('thought-input-text');
+      if (!input.value.trim()) return;
+      if (!window.appState.sharedData.thoughts) window.appState.sharedData.thoughts = [];
+      
+      window.appState.sharedData.thoughts.unshift({
+        text: input.value.trim(),
+        author: window.appState.userProfile.name || 'Moi'
+      });
+
+      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), { thoughts: window.appState.sharedData.thoughts }, { merge: true });
+      input.value = '';
+      window.closeModal('modal-thought');
+      window.showToast("Pensée partagée !");
+    };
+
+    window.saveNewMemory = async () => {
+      const title = document.getElementById('memory-title-input').value.trim() || "Souvenir précieux";
+      const sub = document.getElementById('memory-subtitle-input').value.trim() || "";
+      if (!selectedImageBase64) return alert("Sélectionnez d'abord une photo !");
+
+      if (!window.appState.sharedData.memories) window.appState.sharedData.memories = [];
+      window.appState.sharedData.memories.unshift({
+        id: Date.now(),
+        title, sub,
+        img: selectedImageBase64,
+        author: window.appState.userProfile.name || 'Moi',
+        date: new Date().toLocaleDateString('fr-FR')
+      });
+
+      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), { memories: window.appState.sharedData.memories }, { merge: true });
+      selectedImageBase64 = null;
+      document.getElementById('upload-preview-img').classList.add('hidden');
+      document.getElementById('upload-placeholder').classList.remove('hidden');
+      window.closeModal('modal-memory');
+      window.showToast("Photo ajoutée !");
+    };
+
+    window.deleteMemory = async (id) => {
+      if (!confirm("Voulez-vous vraiment supprimer cette photo ?")) return;
+      window.appState.sharedData.memories = window.appState.sharedData.memories.filter(m => m.id !== id);
+      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), { memories: window.appState.sharedData.memories }, { merge: true });
+      window.showToast("Photo supprimée !");
+    };
+
+    window.addNewReunionProject = async () => {
+      const input = document.getElementById('new-project-input');
+      if (!input.value.trim()) return;
+      if (!window.appState.sharedData.reunionProjects) window.appState.sharedData.reunionProjects = [];
+      
+      window.appState.sharedData.reunionProjects.push({
+        text: input.value.trim(),
+        author: window.appState.userProfile.name || 'Moi'
+      });
+
+      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), { reunionProjects: window.appState.sharedData.reunionProjects }, { merge: true });
+      input.value = '';
+      window.showToast("Projet ajouté !");
+    };
+
+    // RENDUS INTERFACE
     window.renderUserProfile = () => {
       const p = window.appState.userProfile;
       document.getElementById('my-name-pill').innerText = `Compte : ${p.name || 'Moi'}`;
       document.getElementById('setting-my-name').value = p.name || '';
       document.getElementById('setting-my-phone').value = p.phone || '';
+
+      const isLauriane = (p.name || '').toLowerCase().includes('lauriane');
+      const partnerName = isLauriane ? 'Benjamin' : 'Lauriane';
+      document.getElementById('header-partner-name').innerText = partnerName;
+
       if (window.appState.sharedData.targetDate) {
         const d = new Date(window.appState.sharedData.targetDate);
         d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
@@ -454,28 +624,58 @@
     window.renderSharedContent = () => {
       const s = window.appState.sharedData;
 
-      // Galerie avec bouton supprimer
+      // Galerie de photos
       const gallery = document.getElementById('gallery-grid');
       gallery.innerHTML = '';
       if (s.memories && s.memories.length > 0) {
         s.memories.forEach(m => {
+          const style = window.getAuthorStyles(m.author);
           gallery.innerHTML += `
-            <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm flex flex-col justify-between relative group">
+            <div class="bg-white rounded-2xl overflow-hidden border ${style.border} shadow-sm flex flex-col justify-between relative group">
               <div class="h-32 w-full bg-slate-100 overflow-hidden relative">
                 <img src="${m.img}" class="w-full h-full object-cover">
-                <span class="absolute top-2 left-2 bg-slate-900/60 backdrop-blur-md text-white text-[9px] font-bold px-2 py-0.5 rounded-md">${m.author}</span>
+                <span class="absolute top-2 left-2 border backdrop-blur-md font-bold px-2 py-0.5 rounded-md text-[9px] ${style.badge}">${m.author}</span>
               </div>
               <div class="p-2.5 flex items-center justify-between">
                 <div class="truncate pr-1">
                   <h4 class="font-bold text-xs text-slate-800 truncate">${m.title}</h4>
-                  <p class="text-[10px] text-slate-400 truncate">${m.sub || ''}</p>
+                  <p class="text-[10px] text-slate-400 truncate">${m.sub || m.date}</p>
                 </div>
                 <button onclick="deleteMemory(${m.id})" class="text-slate-300 hover:text-rose-500 transition p-1"><i class="fas fa-trash-can text-xs"></i></button>
               </div>
             </div>`;
         });
       } else {
-        gallery.innerHTML = '<p class="col-span-2 text-center text-xs text-slate-400 py-6">Aucune photo partagée pour l\'instant.</p>';
+        gallery.innerHTML = '<p class="col-span-2 text-center text-xs text-slate-400 py-6">Aucune photo partagée.</p>';
+      }
+
+      // Pensées
+      const thoughtsList = document.getElementById('thoughts-list');
+      thoughtsList.innerHTML = '';
+      if (s.thoughts && s.thoughts.length > 0) {
+        s.thoughts.forEach(t => {
+          const style = window.getAuthorStyles(t.author);
+          thoughtsList.innerHTML += `
+            <div class="bg-white p-3 rounded-2xl border ${style.border} shadow-sm">
+              <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-md border ${style.badge}">${t.author}</span>
+              <p class="text-xs text-slate-700 italic mt-1 font-medium">"${t.text}"</p>
+            </div>`;
+        });
+      }
+
+      // Projets
+      const projects = document.getElementById('reunion-projects-list');
+      projects.innerHTML = '';
+      if (s.reunionProjects) {
+        document.getElementById('stat-projects-count').innerText = s.reunionProjects.length;
+        s.reunionProjects.forEach(p => {
+          const style = window.getAuthorStyles(p.author);
+          projects.innerHTML += `
+            <div class="p-2.5 bg-slate-50 border ${style.border} rounded-xl text-xs flex justify-between items-center font-medium">
+              <span>${p.text}</span>
+              <span class="text-[9px] font-bold px-2 py-0.5 rounded-md border ${style.badge}">${p.author}</span>
+            </div>`;
+        });
       }
 
       window.updateCountdown();
@@ -497,7 +697,6 @@
       document.getElementById('dodos-badge').innerText = `${days} dodos`;
       document.getElementById('sleeps-summary').innerText = `Plus que ${days} dodo${days > 1 ? 's' : ''} ! 🌙`;
 
-      // Rendu Calendrier
       window.renderCalendarGrid(days);
     };
 
@@ -537,6 +736,144 @@
       }
     };
 
+    // GENERATEUR DE MESSAGES MIGNONS
+    window.generateRandomSweetMessage = () => {
+      const isLauriane = (window.appState.userProfile.name || '').toLowerCase().includes('lauriane');
+      const partnerName = isLauriane ? 'Benjamin' : 'Lauriane';
+
+      const msgs = [
+        `Tu me manques un peu plus chaque seconde, vivement nos retrouvailles ${partnerName} ! 💕`,
+        `Compter les dodos avant de te revoir est la meilleure activité de ma journée ! 🥰`,
+        `Juste un petit mot pour te rappeler à quel point je t'aime ${partnerName}. ✨`,
+        `Tu es mon premier et mon dernier mot de la journée. Hâte de te prendre dans mes bras ! 💖`,
+        `Chaque jour loin de toi rend nos prochaines retrouvailles encore plus magiques.`
+      ];
+
+      document.getElementById('generated-msg-text').innerText = msgs[Math.floor(Math.random() * msgs.length)];
+    };
+
+    window.copyGeneratedMessage = () => {
+      navigator.clipboard.writeText(document.getElementById('generated-msg-text').innerText);
+      window.showToast("Message copié dans le presse-papier !");
+    };
+
+    // TÉLÉPORTATION ET APPELS
+    window.openCallPartnerModal = () => {
+      const isLauriane = (window.appState.userProfile.name || '').toLowerCase().includes('lauriane');
+      const partnerName = isLauriane ? 'Benjamin' : 'Lauriane';
+      document.getElementById('call-modal-partner-name').innerText = partnerName;
+      document.getElementById('modal-call-partner').classList.remove('hidden');
+    };
+
+    window.triggerDirectPhoneCall = () => {
+      const phone = window.appState.userProfile.phone;
+      if (phone) window.location.href = `tel:${phone}`;
+      else alert("Numéro non renseigné dans le profil !");
+    };
+
+    window.triggerWhatsAppCall = () => {
+      const phone = window.appState.userProfile.phone;
+      if (phone) window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}`, '_blank');
+      else alert("Numéro non renseigné dans le profil !");
+    };
+
+    window.openTeleportModal = () => {
+      const currentTarget = window.appState.sharedData.targetDate;
+      const isUsed = window.appState.userProfile.teleportUsedForTarget === currentTarget;
+      const badge = document.getElementById('teleport-credit-badge');
+      const btn = document.getElementById('teleport-launch-btn');
+      const term = document.getElementById('teleport-terminal');
+
+      if (isUsed) {
+        badge.innerText = "0/1 épuisé";
+        badge.className = "text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700";
+        btn.disabled = true;
+        btn.className = "w-full bg-slate-800 text-slate-500 text-xs font-bold py-2.5 rounded-xl cursor-not-allowed mb-2";
+        term.innerHTML = "> CRÉDIT ÉPUISÉ POUR CETTE PÉRIODE.<br>> Attendez les prochaines retrouvailles pour réinitialiser le système.";
+      } else {
+        badge.innerText = "1/1 disponible";
+        badge.className = "text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-800";
+        btn.disabled = false;
+        btn.className = "w-full bg-cyan-500 text-slate-900 text-xs font-bold py-2.5 rounded-xl shadow mb-2 hover:bg-cyan-400 transition";
+        term.innerHTML = "> Système prêt.<br>> Consomme 1 jeton de téléportation.";
+      }
+
+      document.getElementById('modal-teleport').classList.remove('hidden');
+    };
+
+    window.runTeleportSequence = async () => {
+      const currentTarget = window.appState.sharedData.targetDate;
+      const term = document.getElementById('teleport-terminal');
+      const btn = document.getElementById('teleport-launch-btn');
+
+      btn.disabled = true;
+      term.innerHTML = "> Connexion aux satellites quantiques...<br>";
+
+      setTimeout(() => { term.innerHTML += "> Calcul des coordonnées du partenaire...<br>"; }, 1000);
+      setTimeout(() => { term.innerHTML += "> ERREUR 404 : Densité d'amour trop élevée pour la matière physique !<br>"; }, 2200);
+      setTimeout(async () => {
+        term.innerHTML += "<span class='text-amber-400'>> Crédit consommé. Conseil : Passez un coup de fil direct !</span>";
+        
+        window.appState.userProfile.teleportUsedForTarget = currentTarget;
+        await setDoc(doc(db, "users", currentUser.uid), { teleportUsedForTarget: currentTarget }, { merge: true });
+
+        document.getElementById('teleport-credit-badge').innerText = "0/1 épuisé";
+        document.getElementById('teleport-credit-badge').className = "text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700";
+      }, 3500);
+    };
+
+    // UI HELPERS & TABS DYNAMIQUES
+    window.switchTab = (tabId) => {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('text-brand-blue', 'font-bold');
+        btn.classList.add('text-slate-400');
+      });
+
+      const activeBtn = document.getElementById('nav-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-400');
+        activeBtn.classList.add('text-brand-blue', 'font-bold');
+      }
+    };
+
+    window.handleMemoryImageSelect = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 800;
+          let w = img.width, h = img.height;
+          if (w > h && w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
+          else if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          selectedImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
+          
+          document.getElementById('upload-preview-img').src = selectedImageBase64;
+          document.getElementById('upload-preview-img').classList.remove('hidden');
+          document.getElementById('upload-placeholder').classList.add('hidden');
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+    window.openThoughtModal = () => document.getElementById('modal-thought').classList.remove('hidden');
+    window.openAddMemoryModal = () => document.getElementById('modal-memory').classList.remove('hidden');
+    window.openReunionProjectsModal = () => document.getElementById('modal-reunion-projects').classList.remove('hidden');
+    window.openMessageGeneratorModal = () => {
+      window.generateRandomSweetMessage();
+      document.getElementById('modal-message').classList.remove('hidden');
+    };
+
     window.showToast = (msg) => {
       const toast = document.getElementById('toast-banner');
       document.getElementById('toast-message').innerText = msg;
@@ -549,14 +886,6 @@
     };
 
     setInterval(window.updateCountdown, 1000);
-
-    // UI Helpers
-    window.switchTab = (id) => {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-      document.getElementById(id).classList.remove('hidden');
-    };
-    window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
-    window.openAddMemoryModal = () => document.getElementById('modal-memory').classList.remove('hidden');
   </script>
 </body>
 </html>
