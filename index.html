@@ -28,11 +28,11 @@
     .panic-button {
       background: linear-gradient(135deg, #ff416c, #ff4b2b);
       box-shadow: 0 8px 22px rgba(255, 75, 43, 0.45);
-      animation: pulse-gentle 2.4s infinite;
+      animation: pulse-gentle 1.8s infinite;
     }
     @keyframes pulse-gentle {
       0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.04); }
+      50% { transform: scale(1.05); }
     }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -158,9 +158,13 @@
             <span class="text-xs font-bold text-slate-800">Écrire une pensée</span>
           </div>
 
-          <div onclick="switchTab('tab-soutien')" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center cursor-pointer hover:bg-slate-50 transition">
-            <div class="w-12 h-12 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center text-xl mb-2"><i class="fas fa-heart-circle-check"></i></div>
-            <span class="text-xs font-bold text-slate-800">SOS Manque</span>
+          <!-- SOS MANQUE : BOUTON URGENCE EXTRÊME -->
+          <div onclick="triggerPanicEmergency()" class="panic-button text-white p-4 rounded-2xl shadow-lg flex flex-col items-center text-center cursor-pointer transition transform hover:scale-105 border-2 border-white/40">
+            <div class="w-12 h-12 rounded-full bg-white/20 text-white flex items-center justify-center text-xl mb-2 shadow-inner">
+              <i class="fas fa-heart-crack text-white animate-pulse"></i>
+            </div>
+            <span class="text-xs font-extrabold tracking-wide uppercase">SOS Manque</span>
+            <span class="text-[9px] text-white/80 mt-0.5 font-semibold">Urgence extrême 🚨</span>
           </div>
         </div>
       </section>
@@ -230,13 +234,13 @@
             <span id="calendar-progress-percent" class="text-xs font-extrabold bg-blue-50 text-brand-blue px-2.5 py-1 rounded-full">0%</span>
           </div>
 
-          <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-            <div id="calendar-progress-bar" class="bg-brand-blue h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+          <div class="w-full bg-slate-100 rounded-full h-3.5 overflow-hidden p-0.5 border border-slate-200">
+            <div id="calendar-progress-bar" class="bg-gradient-to-r from-blue-500 to-indigo-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
           </div>
 
           <div class="flex justify-between text-[11px] font-bold text-slate-400 pt-1">
-            <span>Dernières retrouvailles</span>
-            <span class="text-brand-blue font-extrabold">Prochaines retrouvailles ✨</span>
+            <span id="calendar-start-date-label">Début du manque</span>
+            <span class="text-brand-blue font-extrabold">Retrouvailles ✨</span>
           </div>
         </div>
 
@@ -281,7 +285,12 @@
         <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-4">
           <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
             <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm font-bold">🗓️</div>
-            <h3 class="text-sm font-bold text-slate-800">Date des Retrouvailles (Partagée)</h3>
+            <h3 class="text-sm font-bold text-slate-800">Dates du Couple (Partagées)</h3>
+          </div>
+
+          <div>
+            <label class="text-[11px] font-bold text-slate-600 block mb-1">Début de la séparation</label>
+            <input type="datetime-local" id="setting-start-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-brand-blue">
           </div>
 
           <div>
@@ -290,13 +299,13 @@
           </div>
 
           <button onclick="saveSharedCoupleDates()" class="w-full bg-slate-900 text-white font-bold text-xs py-3 rounded-xl shadow hover:bg-black transition flex items-center justify-center gap-2">
-            <i class="fas fa-sync-alt"></i> Mettre à jour la date pour le couple
+            <i class="fas fa-sync-alt"></i> Mettre à jour les dates du couple
           </button>
         </div>
       </section>
     </main>
 
-    <!-- Navigation Bar en bas avec couleurs dynamiques -->
+    <!-- Navigation Bar -->
     <nav id="app-nav" class="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200/80 px-2 py-2 flex justify-around items-center z-50 hidden">
       <button onclick="switchTab('tab-accueil')" id="nav-tab-accueil" class="nav-btn flex flex-col items-center py-1 px-3 text-brand-blue font-bold">
         <i class="fas fa-house text-lg mb-0.5"></i>
@@ -324,7 +333,39 @@
       </button>
     </nav>
 
-    <!-- MODALS -->
+    <!-- MODAL FENÊTRE FORTE SOS URGENCE EXTRÊME -->
+    <div id="modal-panic" class="fixed inset-0 bg-rose-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-white w-full max-w-xs rounded-3xl p-6 text-center shadow-2xl relative animate-bounce border-2 border-rose-500">
+        <div class="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto text-2xl mb-3 shadow-inner">
+          <i class="fas fa-heart text-2xl animate-pulse"></i>
+        </div>
+        <h3 class="text-lg font-black text-slate-900">ALERTE SOS MANQUE 🚨</h3>
+        <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+          Le manque est trop fort ? Ne restez pas seul avec ce sentiment, réagissez tout de suite !
+        </p>
+
+        <div class="my-4 p-3 bg-rose-50 border border-rose-100 rounded-2xl text-left">
+          <span class="text-[10px] font-extrabold text-rose-600 uppercase tracking-wider block">Conseil d'urgence :</span>
+          <p class="text-xs text-slate-700 font-semibold mt-0.5 leading-snug">
+            Appelez-la immédiatement ou envoyez-lui un petit mot doux. Elle pense sûrement à vous en ce moment.
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <button onclick="closeModal('modal-panic'); openCallPartnerModal();" class="w-full bg-brand-blue text-white text-xs font-extrabold py-3 rounded-xl shadow-lg hover:bg-brand-darkblue transition flex items-center justify-center gap-2">
+            <i class="fas fa-phone"></i> L'appeler directement
+          </button>
+          <button onclick="closeModal('modal-panic'); openMessageGeneratorModal();" class="w-full bg-emerald-500 text-white text-xs font-bold py-2.5 rounded-xl shadow hover:bg-emerald-600 transition flex items-center justify-center gap-2">
+            <i class="fas fa-comment-dots"></i> Lui envoyer un mot doux
+          </button>
+          <button onclick="closeModal('modal-panic')" class="w-full text-slate-400 text-xs font-semibold py-1.5 hover:text-slate-600">
+            Fermer l'alerte
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUTRES MODALS -->
     <div id="modal-call-partner" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
       <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl text-center">
         <h3 class="text-base font-extrabold text-slate-900 mb-1">Appeler <span id="call-modal-partner-name">l'autre</span></h3>
@@ -443,8 +484,11 @@
 
     window.appState = {
       userProfile: { name: "", phone: "", teleportUsedForTarget: "" },
-      allUsers: {},
-      sharedData: { targetDate: new Date(Date.now() + 3*24*60*60*1000).toISOString(), thoughts: [], memories: [], reunionProjects: [] }
+      sharedData: { 
+        startDate: new Date(Date.now() - 3*24*60*60*1000).toISOString(),
+        targetDate: new Date(Date.now() + 3*24*60*60*1000).toISOString(), 
+        thoughts: [], memories: [], reunionProjects: [] 
+      }
     };
 
     onAuthStateChanged(auth, async (user) => {
@@ -454,7 +498,6 @@
         document.getElementById('app-container').classList.remove('hidden');
         document.getElementById('app-nav').classList.remove('hidden');
 
-        // Charger profil de l'utilisateur connecté
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
           window.appState.userProfile = userDoc.data();
@@ -462,7 +505,6 @@
           window.appState.userProfile = { name: user.email.split('@')[0], phone: "", teleportUsedForTarget: "" };
         }
 
-        // Écouter les données du couple en direct
         onSnapshot(doc(db, "couples", COUPLE_ROOM_ID), (snapshot) => {
           if (snapshot.exists()) {
             window.appState.sharedData = snapshot.data();
@@ -470,7 +512,6 @@
           }
         });
 
-        // Écouter tous les profils utilisateurs pour récupérer les numéros et prénoms
         onSnapshot(doc(db, "users", user.uid), (snapshot) => {
           if (snapshot.exists()) {
             window.appState.userProfile = snapshot.data();
@@ -504,22 +545,14 @@
 
     window.logoutUser = () => signOut(auth);
 
-    // DÉTERMINATION DE LA COULEUR SELON L'AUTEUR
     window.getAuthorStyles = (authorName) => {
       const name = (authorName || '').toLowerCase();
       if (name.includes('lauriane')) {
-        return {
-          badge: "bg-rose-100 text-rose-700 border-rose-200",
-          border: "border-rose-200 bg-rose-50/20"
-        };
+        return { badge: "bg-rose-100 text-rose-700 border-rose-200", border: "border-rose-200 bg-rose-50/20" };
       }
-      return {
-        badge: "bg-blue-100 text-brand-blue border-blue-200",
-        border: "border-blue-200 bg-blue-50/20"
-      };
+      return { badge: "bg-blue-100 text-brand-blue border-blue-200", border: "border-blue-200 bg-blue-50/20" };
     };
 
-    // SAUVEGARDES ET ACTIONS
     window.saveMyPersonalProfile = async () => {
       const name = document.getElementById('setting-my-name').value.trim();
       const phone = document.getElementById('setting-my-phone').value.trim();
@@ -532,15 +565,20 @@
     };
 
     window.saveSharedCoupleDates = async () => {
-      const val = document.getElementById('setting-target-date').value;
-      if (!val) return alert("Veuillez choisir une date valide !");
+      const startVal = document.getElementById('setting-start-date').value;
+      const targetVal = document.getElementById('setting-target-date').value;
 
-      const newTarget = new Date(val).toISOString();
-      window.appState.sharedData.targetDate = newTarget;
+      if (!targetVal) return alert("Veuillez choisir une date de retrouvailles !");
+
+      const updates = { targetDate: new Date(targetVal).toISOString() };
+      if (startVal) updates.startDate = new Date(startVal).toISOString();
+
+      window.appState.sharedData.targetDate = updates.targetDate;
+      if (updates.startDate) window.appState.sharedData.startDate = updates.startDate;
       
-      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), { targetDate: newTarget }, { merge: true });
+      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), updates, { merge: true });
       window.updateCountdown();
-      window.showToast("Date des retrouvailles mise à jour !");
+      window.showToast("Dates du couple mises à jour !");
     };
 
     window.saveNewThought = async () => {
@@ -548,11 +586,7 @@
       if (!input.value.trim()) return;
       if (!window.appState.sharedData.thoughts) window.appState.sharedData.thoughts = [];
       
-      window.appState.sharedData.thoughts.unshift({
-        text: input.value.trim(),
-        author: window.appState.userProfile.name || 'Moi'
-      });
-
+      window.appState.sharedData.thoughts.unshift({ text: input.value.trim(), author: window.appState.userProfile.name || 'Moi' });
       await setDoc(doc(db, "couples", COUPLE_ROOM_ID), { thoughts: window.appState.sharedData.thoughts }, { merge: true });
       input.value = '';
       window.closeModal('modal-thought');
@@ -566,11 +600,8 @@
 
       if (!window.appState.sharedData.memories) window.appState.sharedData.memories = [];
       window.appState.sharedData.memories.unshift({
-        id: Date.now(),
-        title, sub,
-        img: selectedImageBase64,
-        author: window.appState.userProfile.name || 'Moi',
-        date: new Date().toLocaleDateString('fr-FR')
+        id: Date.now(), title, sub, img: selectedImageBase64,
+        author: window.appState.userProfile.name || 'Moi', date: new Date().toLocaleDateString('fr-FR')
       });
 
       await setDoc(doc(db, "couples", COUPLE_ROOM_ID), { memories: window.appState.sharedData.memories }, { merge: true });
@@ -593,17 +624,12 @@
       if (!input.value.trim()) return;
       if (!window.appState.sharedData.reunionProjects) window.appState.sharedData.reunionProjects = [];
       
-      window.appState.sharedData.reunionProjects.push({
-        text: input.value.trim(),
-        author: window.appState.userProfile.name || 'Moi'
-      });
-
+      window.appState.sharedData.reunionProjects.push({ text: input.value.trim(), author: window.appState.userProfile.name || 'Moi' });
       await setDoc(doc(db, "couples", COUPLE_ROOM_ID), { reunionProjects: window.appState.sharedData.reunionProjects }, { merge: true });
       input.value = '';
       window.showToast("Projet ajouté !");
     };
 
-    // RENDUS INTERFACE
     window.renderUserProfile = () => {
       const p = window.appState.userProfile;
       document.getElementById('my-name-pill').innerText = `Compte : ${p.name || 'Moi'}`;
@@ -615,16 +641,21 @@
       document.getElementById('header-partner-name').innerText = partnerName;
 
       if (window.appState.sharedData.targetDate) {
-        const d = new Date(window.appState.sharedData.targetDate);
-        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-        document.getElementById('setting-target-date').value = d.toISOString().slice(0, 16);
+        const dTarget = new Date(window.appState.sharedData.targetDate);
+        dTarget.setMinutes(dTarget.getMinutes() - dTarget.getTimezoneOffset());
+        document.getElementById('setting-target-date').value = dTarget.toISOString().slice(0, 16);
+      }
+
+      if (window.appState.sharedData.startDate) {
+        const dStart = new Date(window.appState.sharedData.startDate);
+        dStart.setMinutes(dStart.getMinutes() - dStart.getTimezoneOffset());
+        document.getElementById('setting-start-date').value = dStart.toISOString().slice(0, 16);
       }
     };
 
     window.renderSharedContent = () => {
       const s = window.appState.sharedData;
 
-      // Galerie de photos
       const gallery = document.getElementById('gallery-grid');
       gallery.innerHTML = '';
       if (s.memories && s.memories.length > 0) {
@@ -649,7 +680,6 @@
         gallery.innerHTML = '<p class="col-span-2 text-center text-xs text-slate-400 py-6">Aucune photo partagée.</p>';
       }
 
-      // Pensées
       const thoughtsList = document.getElementById('thoughts-list');
       thoughtsList.innerHTML = '';
       if (s.thoughts && s.thoughts.length > 0) {
@@ -663,7 +693,6 @@
         });
       }
 
-      // Projets
       const projects = document.getElementById('reunion-projects-list');
       projects.innerHTML = '';
       if (s.reunionProjects) {
@@ -682,8 +711,11 @@
     };
 
     window.updateCountdown = () => {
+      const now = new Date().getTime();
       const target = new Date(window.appState.sharedData.targetDate || Date.now()).getTime();
-      const diff = Math.max(0, target - new Date().getTime());
+      const start = new Date(window.appState.sharedData.startDate || (Date.now() - 3*24*60*60*1000)).getTime();
+
+      const diff = Math.max(0, target - now);
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -696,6 +728,14 @@
       document.getElementById('stat-dodos').innerText = days;
       document.getElementById('dodos-badge').innerText = `${days} dodos`;
       document.getElementById('sleeps-summary').innerText = `Plus que ${days} dodo${days > 1 ? 's' : ''} ! 🌙`;
+
+      // CALCUL ET DYNAMISME JAUGE PROGRESSION
+      const totalSpan = Math.max(1, target - start);
+      const elapsedSpan = Math.max(0, now - start);
+      const percent = Math.min(100, Math.max(0, Math.round((elapsedSpan / totalSpan) * 100)));
+
+      document.getElementById('calendar-progress-bar').style.width = `${percent}%`;
+      document.getElementById('calendar-progress-percent').innerText = `${percent}%`;
 
       window.renderCalendarGrid(days);
     };
@@ -736,7 +776,6 @@
       }
     };
 
-    // GENERATEUR DE MESSAGES MIGNONS
     window.generateRandomSweetMessage = () => {
       const isLauriane = (window.appState.userProfile.name || '').toLowerCase().includes('lauriane');
       const partnerName = isLauriane ? 'Benjamin' : 'Lauriane';
@@ -754,10 +793,14 @@
 
     window.copyGeneratedMessage = () => {
       navigator.clipboard.writeText(document.getElementById('generated-msg-text').innerText);
-      window.showToast("Message copié dans le presse-papier !");
+      window.showToast("Message copié !");
     };
 
-    // TÉLÉPORTATION ET APPELS
+    window.triggerPanicEmergency = () => {
+      try { confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } }); } catch(err){}
+      document.getElementById('modal-panic').classList.remove('hidden');
+    };
+
     window.openCallPartnerModal = () => {
       const isLauriane = (window.appState.userProfile.name || '').toLowerCase().includes('lauriane');
       const partnerName = isLauriane ? 'Benjamin' : 'Lauriane';
@@ -822,7 +865,6 @@
       }, 3500);
     };
 
-    // UI HELPERS & TABS DYNAMIQUES
     window.switchTab = (tabId) => {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
       document.getElementById(tabId).classList.remove('hidden');
