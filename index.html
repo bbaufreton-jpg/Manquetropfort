@@ -36,36 +36,13 @@
     }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    @keyframes ping-subtle {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.2); opacity: 0.7; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    .duo-sync-indicator { animation: ping-subtle 3s infinite; }
   </style>
 </head>
 <body class="h-full flex justify-center items-center bg-slate-900 text-slate-800 antialiased sm:py-6">
 
   <div class="w-full max-w-md h-full sm:h-[844px] bg-slate-50 sm:rounded-[40px] shadow-2xl flex flex-col overflow-hidden relative border-0 sm:border-[8px] sm:border-slate-800">
     
-    <!-- Top Mobile Notch -->
-    <div class="hidden sm:flex justify-between items-center px-6 pt-3 pb-1 bg-brand-blue text-white text-xs font-semibold z-50">
-      <span id="notch-clock">09:41</span>
-      <div class="w-20 h-4 bg-slate-900 rounded-full mx-auto"></div>
-      <div class="flex items-center space-x-1.5">
-        <i class="fas fa-signal"></i>
-        <i class="fas fa-wifi"></i>
-        <i class="fas fa-battery-full"></i>
-      </div>
-    </div>
-
-    <!-- Live Toast Banner -->
-    <div id="toast-banner" class="fixed top-4 left-1/2 -translate-x-1/2 max-w-xs w-full bg-slate-900/95 text-white text-xs font-medium px-4 py-3 rounded-2xl shadow-xl z-[100] transform -translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2.5">
-      <i id="toast-icon" class="fas fa-check-circle text-emerald-400 text-base"></i>
-      <span id="toast-message">Action effectuée</span>
-    </div>
-
-    <!-- ÉCRAN DE CONNEXION SÉCURISÉ -->
+    <!-- ÉCRAN DE CONNEXION -->
     <div id="auth-screen" class="flex-1 flex flex-col justify-center items-center p-6 bg-slate-50 z-50">
       <div class="w-16 h-16 bg-blue-100 text-brand-blue rounded-3xl flex items-center justify-center text-3xl mb-4 shadow-sm">
         <i class="fas fa-heart text-brand-blue"></i>
@@ -93,7 +70,7 @@
       </div>
     </div>
 
-    <!-- MAIN APP CONTAINER (Masqué avant connexion) -->
+    <!-- MAIN APP CONTAINER -->
     <main id="app-container" class="flex-1 overflow-y-auto hide-scrollbar pb-24 relative hidden">
       
       <!-- TAB ACCUEIL -->
@@ -101,8 +78,8 @@
         <div class="bg-brand-blue text-white pt-6 pb-14 px-6 rounded-b-[36px] relative shadow-md">
           <div class="flex justify-between items-center mb-3">
             <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md pl-1.5 pr-3 py-1 rounded-full text-[11px] font-bold text-white border border-white/20">
-              <span id="my-avatar-badge" class="w-5 h-5 rounded-full bg-white text-brand-blue flex items-center justify-center text-xs shadow-sm">👦</span>
-              <span class="truncate max-w-[120px]" id="my-name-pill">Compte : ...</span>
+              <span class="w-5 h-5 rounded-full bg-white text-brand-blue flex items-center justify-center text-xs shadow-sm">👦</span>
+              <span class="truncate max-w-[120px]" id="my-name-pill">Compte</span>
             </div>
 
             <button onclick="logoutUser()" class="bg-black/20 hover:bg-black/30 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-semibold text-white transition border border-white/10">
@@ -120,7 +97,6 @@
             </h1>
           </div>
 
-          <!-- Main Countdown Glass Box -->
           <div class="glass-card rounded-3xl p-5 text-center shadow-lg relative overflow-hidden">
             <div class="flex justify-center items-center gap-1.5 text-amber-300 text-xs sm:text-sm font-semibold mb-2">
               <i class="fas fa-sparkles"></i>
@@ -166,22 +142,6 @@
           </div>
         </div>
 
-        <!-- Personal Goal Gauge -->
-        <div class="px-5 mt-3">
-          <div onclick="openCustomObjectiveModal()" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition cursor-pointer group">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg"><i class="fas fa-gift"></i></div>
-                <div>
-                  <h4 class="font-bold text-sm text-slate-900 leading-tight">🔒 Ma surprise secrète</h4>
-                  <p class="text-xs text-slate-500 mt-0.5" id="objective-title-display">Appuyer pour modifier</p>
-                </div>
-              </div>
-              <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
-            </div>
-          </div>
-        </div>
-
         <div class="px-5 mt-5 flex justify-between items-center">
           <h3 class="font-bold text-base text-slate-900">Pensées partagées</h3>
           <button onclick="switchTab('tab-photos')" class="text-xs font-bold text-brand-blue hover:underline">Tout voir</button>
@@ -198,15 +158,6 @@
             <span class="text-xs font-bold text-slate-800">SOS Manque</span>
           </div>
         </div>
-
-        <div class="px-5 mt-4">
-          <div class="bg-blue-50/70 rounded-2xl p-4 border border-blue-100">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="text-[10px] font-bold text-brand-blue uppercase tracking-wider" id="latest-thought-author-badge">Dernière pensée</span>
-            </div>
-            <p class="text-xs italic text-slate-700 leading-relaxed" id="latest-thought-text">"Aucune pensée notée pour le moment."</p>
-          </div>
-        </div>
       </section>
 
       <!-- TAB SOUTIEN -->
@@ -216,11 +167,26 @@
           <button onclick="openMessageGeneratorModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 text-left">
             <div class="flex items-center gap-3.5"><i class="fas fa-comment-dots text-brand-blue text-lg"></i><span class="font-semibold text-sm">Générer un message</span></div>
           </button>
+
           <button onclick="openCallPartnerModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 text-left">
             <div class="flex items-center gap-3.5"><i class="fas fa-phone text-brand-blue text-lg"></i><span class="font-semibold text-sm">Lui téléphoner</span></div>
           </button>
-          <button onclick="openBreathingModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 text-left">
-            <div class="flex items-center gap-3.5"><i class="fas fa-wind text-emerald-500 text-lg"></i><span class="font-semibold text-sm">Respiration anti-stress</span></div>
+
+          <!-- TÉLÉPORTATION QUANTIQUE DANS L'ONGLET SOUTIEN -->
+          <button onclick="openTeleportModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 text-left bg-gradient-to-r from-cyan-50/50 to-blue-50/50">
+            <div class="flex items-center gap-3.5">
+              <div class="w-10 h-10 rounded-full bg-slate-900 text-cyan-400 flex items-center justify-center text-base shadow-sm">
+                <i class="fas fa-satellite-dish"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-sm text-slate-900">Téléportation Quantique</span>
+                  <span id="teleport-credit-badge" class="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-800">1/1 disponible</span>
+                </div>
+                <span class="text-[10px] text-slate-500">1 seul essai par période de manque !</span>
+              </div>
+            </div>
+            <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
           </button>
         </div>
       </section>
@@ -228,11 +194,18 @@
       <!-- TAB PHOTOS / SOUVENIRS -->
       <section id="tab-photos" class="tab-content hidden p-5 space-y-4">
         <div class="flex justify-between items-center pt-2">
-          <h2 class="text-2xl font-extrabold text-slate-900">Souvenirs Duo</h2>
-          <button onclick="openAddMemoryModal()" class="bg-brand-blue text-white text-xs px-3.5 py-2 rounded-xl font-semibold shadow">+ Ajouter une photo</button>
+          <div>
+            <h2 class="text-2xl font-extrabold text-slate-900">Album Souvenirs</h2>
+            <p class="text-xs text-slate-500">Galerie photos synchronisée en direct</p>
+          </div>
+          <button onclick="openAddMemoryModal()" class="bg-brand-blue text-white text-xs px-3.5 py-2.5 rounded-xl font-bold shadow hover:bg-brand-darkblue transition flex items-center gap-1.5">
+            <i class="fas fa-camera"></i> + Photo
+          </button>
         </div>
+
         <div class="grid grid-cols-2 gap-3" id="gallery-grid"></div>
-        <div class="pt-2">
+
+        <div class="pt-4 border-t border-slate-200">
           <h3 class="text-sm font-bold text-slate-800 mb-2">Journal de nos pensées</h3>
           <div class="space-y-2.5" id="thoughts-list"></div>
         </div>
@@ -251,9 +224,9 @@
 
       <!-- TAB PROFIL -->
       <section id="tab-profil" class="tab-content hidden p-5 space-y-4">
-        <h2 class="text-2xl font-extrabold text-slate-900">Mon Profil Personnel</h2>
+        <h2 class="text-2xl font-extrabold text-slate-900">Mon Profil</h2>
         <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-3.5">
-          <h3 class="text-sm font-bold text-slate-800">Mes Informations Privées</h3>
+          <h3 class="text-sm font-bold text-slate-800">Mes Informations</h3>
           <div>
             <label class="text-[11px] font-bold text-slate-600 block mb-1">Mon Prénom</label>
             <input type="text" id="setting-my-name" placeholder="Votre prénom" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold">
@@ -266,20 +239,12 @@
         </div>
 
         <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-3.5">
-          <h3 class="text-sm font-bold text-slate-800">Date des Retrouvailles (Partagée)</h3>
+          <h3 class="text-sm font-bold text-slate-800">Date des Retrouvailles</h3>
           <input type="datetime-local" id="setting-target-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold">
-          <button onclick="saveSharedCoupleDates()" class="w-full bg-slate-800 text-white font-bold text-xs py-2.5 rounded-xl shadow">Enregistrer la date</button>
+          <button onclick="saveSharedCoupleDates()" class="w-full bg-slate-800 text-white font-bold text-xs py-2.5 rounded-xl shadow">Mettre à jour la date</button>
         </div>
       </section>
     </main>
-
-    <!-- Floating Panic SOS -->
-    <div id="floating-sos-btn" class="absolute bottom-20 right-4 z-40 hidden">
-      <button onclick="triggerPanicEmergency()" class="panic-button text-white font-bold text-xs px-4 py-3 rounded-full flex items-center gap-2 shadow-xl border-2 border-white">
-        <i class="fas fa-heart-crack text-white text-base"></i>
-        <span class="block text-xs font-extrabold">SOS Manque !</span>
-      </button>
-    </div>
 
     <!-- Bottom Nav -->
     <nav id="app-nav" class="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200/80 px-2 py-2 flex justify-around items-center z-50 hidden">
@@ -290,21 +255,44 @@
       <button onclick="switchTab('tab-profil')" id="nav-tab-profil" class="nav-btn flex flex-col items-center py-1 px-3 text-slate-400"><i class="fas fa-user text-lg mb-0.5"></i><span class="text-[10px]">Compte</span></button>
     </nav>
 
-    <!-- MODALS -->
-    <div id="modal-call-partner" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-      <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl text-center">
-        <h3 class="text-base font-extrabold text-slate-900 mb-3">Lancer un appel</h3>
-        <button onclick="triggerDirectPhoneCall()" class="w-full p-3 bg-blue-50 text-slate-800 font-bold text-xs rounded-2xl mb-2">Appel classique</button>
-        <button onclick="triggerWhatsAppCall()" class="w-full p-3 bg-emerald-50 text-slate-800 font-bold text-xs rounded-2xl mb-3">WhatsApp Audio</button>
-        <button onclick="closeModal('modal-call-partner')" class="text-xs text-slate-400">Annuler</button>
+    <!-- MODAL TÉLÉPORTATION QUANTIQUE -->
+    <div id="modal-teleport" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-slate-900 border border-slate-800 text-white w-full max-w-xs rounded-3xl p-5 shadow-2xl text-center">
+        <div class="w-14 h-14 bg-cyan-500/20 text-cyan-400 rounded-full flex items-center justify-center mx-auto text-2xl mb-3">
+          <i class="fas fa-atom animate-spin"></i>
+        </div>
+        <h3 class="text-base font-extrabold text-white mb-1">Téléportation Quantique</h3>
+        <p class="text-[11px] text-slate-400 mb-3" id="teleport-modal-status">Consomme votre unique crédit de cette période de manque.</p>
+
+        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-left font-mono text-[10px] text-cyan-400 mb-4 h-24 overflow-y-auto" id="teleport-terminal">
+          > Système prêt.<br>> Crédit disponible : 1/1.
+        </div>
+
+        <button onclick="runTeleportSequence()" id="teleport-launch-btn" class="w-full bg-cyan-500 text-slate-900 text-xs font-bold py-2.5 rounded-xl shadow mb-2 hover:bg-cyan-400 transition">
+          Lancer le transfert
+        </button>
+        <button onclick="closeModal('modal-teleport')" class="w-full text-xs text-slate-400 py-1">Fermer</button>
       </div>
     </div>
 
-    <div id="modal-panic" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-      <div class="bg-white w-full max-w-xs rounded-3xl p-5 text-center shadow-2xl">
-        <h3 class="text-lg font-extrabold text-slate-900 mb-2">Respirez doucement 💖</h3>
-        <p class="text-xs text-slate-600 mb-4">Ce manque prouve la force de votre amour.</p>
-        <button onclick="closeModal('modal-panic')" class="w-full bg-brand-blue text-white font-bold text-xs py-2 rounded-xl">Fermer</button>
+    <!-- AUTRES MODALS -->
+    <div id="modal-memory" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl">
+        <h3 class="text-base font-extrabold text-slate-900 mb-1">Ajouter un souvenir</h3>
+        <input type="file" id="memory-file-input" accept="image/*" class="hidden" onchange="handleMemoryImageSelect(event)">
+        <div onclick="document.getElementById('memory-file-input').click()" class="border-2 border-dashed border-slate-300 rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer bg-slate-50 mb-3 relative overflow-hidden min-h-[140px]">
+          <div id="upload-placeholder" class="text-center">
+            <i class="fas fa-cloud-arrow-up text-2xl text-brand-blue mb-1"></i>
+            <span class="text-xs font-bold text-slate-700 block">Choisir une photo</span>
+          </div>
+          <img id="upload-preview-img" src="" class="absolute inset-0 w-full h-full object-cover hidden">
+        </div>
+        <input type="text" id="memory-title-input" placeholder="Titre..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs mb-2">
+        <input type="text" id="memory-subtitle-input" placeholder="Sous-titre..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs mb-4">
+        <div class="flex gap-2">
+          <button onclick="closeModal('modal-memory')" class="flex-1 bg-slate-100 text-xs py-2.5 rounded-xl font-bold">Annuler</button>
+          <button onclick="saveNewMemory()" class="flex-1 bg-brand-blue text-white text-xs font-bold py-2.5 rounded-xl">Publier</button>
+        </div>
       </div>
     </div>
 
@@ -315,18 +303,6 @@
         <div class="flex gap-2 mt-3">
           <button onclick="closeModal('modal-thought')" class="flex-1 bg-slate-100 text-xs py-2 rounded-xl">Annuler</button>
           <button onclick="saveNewThought()" class="flex-1 bg-brand-blue text-white text-xs font-bold py-2 rounded-xl">Enregistrer</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="modal-memory" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-      <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl">
-        <h3 class="text-base font-extrabold text-slate-900 mb-2">Nouveau souvenir</h3>
-        <input type="text" id="memory-title-input" placeholder="Titre du souvenir" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs mb-2">
-        <input type="text" id="memory-subtitle-input" placeholder="Petit mot..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs mb-3">
-        <div class="flex gap-2">
-          <button onclick="closeModal('modal-memory')" class="flex-1 bg-slate-100 text-xs py-2 rounded-xl">Annuler</button>
-          <button onclick="saveNewMemory()" class="flex-1 bg-brand-blue text-white text-xs font-bold py-2 rounded-xl">Ajouter</button>
         </div>
       </div>
     </div>
@@ -343,35 +319,9 @@
       </div>
     </div>
 
-    <div id="modal-custom-objective" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-      <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl">
-        <h3 class="text-base font-extrabold text-slate-900 mb-1">Surprise secrète 🤫</h3>
-        <p class="text-[11px] text-slate-500 mb-3">Cette surprise reste privée sur votre compte.</p>
-        <input type="text" id="modal-objective-title-input" placeholder="Ex: Cadeau réservé..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs mb-3">
-        <button onclick="saveCustomObjective()" class="w-full bg-brand-blue text-white font-bold text-xs py-2.5 rounded-xl">Enregistrer</button>
-        <button onclick="closeModal('modal-custom-objective')" class="w-full text-slate-400 text-xs mt-2">Annuler</button>
-      </div>
-    </div>
-
-    <div id="modal-message" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-      <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl text-center">
-        <h3 class="text-base font-extrabold text-slate-900 mb-2">Mot doux</h3>
-        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs italic text-slate-700 mb-4" id="generated-msg-text">"Tu me manques fort !"</div>
-        <button onclick="closeModal('modal-message')" class="w-full bg-brand-blue text-white font-bold text-xs py-2 rounded-xl">Fermer</button>
-      </div>
-    </div>
-
-    <div id="modal-breathing" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
-      <div class="bg-white w-full max-w-xs rounded-3xl p-6 text-center shadow-2xl">
-        <h3 class="text-base font-extrabold text-slate-900 mb-4">Apaiser le cœur 🫁</h3>
-        <div class="w-24 h-24 mx-auto rounded-full bg-brand-blue text-white flex items-center justify-center font-bold text-xs transition-all duration-1000 transform" id="breathing-circle">Inspirez...</div>
-        <button onclick="closeModal('modal-breathing')" class="mt-6 w-full text-xs text-slate-400">Fermer</button>
-      </div>
-    </div>
-
   </div>
 
-  <!-- FIREBASE AUTH & FIRESTORE ENGINE -->
+  <!-- FIREBASE ENGINE & TÉLÉPORTATION CREDITS LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -392,36 +342,27 @@
 
     const COUPLE_ROOM_ID = "COUPLE-2026";
     let currentUser = null;
+    let selectedImageBase64 = null;
 
-    // État global
     window.appState = {
-      userProfile: { name: "", phone: "", secretObjective: "" },
-      sharedData: {
-        targetDate: new Date(Date.now() + 2*24*60*60*1000).toISOString(),
-        thoughts: [],
-        memories: [],
-        reunionProjects: []
-      }
+      userProfile: { name: "", phone: "", teleportUsedForTarget: "" },
+      sharedData: { targetDate: new Date(Date.now() + 2*24*60*60*1000).toISOString(), thoughts: [], memories: [], reunionProjects: [] }
     };
 
-    // Authentification listener
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('app-container').classList.remove('hidden');
         document.getElementById('app-nav').classList.remove('hidden');
-        document.getElementById('floating-sos-btn').classList.remove('hidden');
 
-        // Charger profil privé
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
           window.appState.userProfile = userDoc.data();
         } else {
-          window.appState.userProfile = { name: user.email.split('@')[0], phone: "", secretObjective: "" };
+          window.appState.userProfile = { name: user.email.split('@')[0], phone: "", teleportUsedForTarget: "" };
         }
 
-        // Ecouter les données partagées
         onSnapshot(doc(db, "couples", COUPLE_ROOM_ID), (snapshot) => {
           if (snapshot.exists()) {
             window.appState.sharedData = snapshot.data();
@@ -435,19 +376,13 @@
         document.getElementById('auth-screen').classList.remove('hidden');
         document.getElementById('app-container').classList.add('hidden');
         document.getElementById('app-nav').classList.add('hidden');
-        document.getElementById('floating-sos-btn').classList.add('hidden');
       }
     });
 
-    // Fonctions Auth
     window.loginUser = async () => {
       const email = document.getElementById('auth-email').value;
       const pass = document.getElementById('auth-password').value;
-      try {
-        await signInWithEmailAndPassword(auth, email, pass);
-      } catch (err) {
-        showAuthError("Erreur : " + err.message);
-      }
+      try { await signInWithEmailAndPassword(auth, email, pass); } catch (err) { alert(err.message); }
     };
 
     window.registerUser = async () => {
@@ -455,78 +390,139 @@
       const pass = document.getElementById('auth-password').value;
       try {
         const res = await createUserWithEmailAndPassword(auth, email, pass);
-        await setDoc(doc(db, "users", res.user.uid), {
-          name: email.split('@')[0],
-          phone: "",
-          secretObjective: ""
-        });
-      } catch (err) {
-        showAuthError("Erreur : " + err.message);
-      }
+        await setDoc(doc(db, "users", res.user.uid), { name: email.split('@')[0], phone: "", teleportUsedForTarget: "" });
+      } catch (err) { alert(err.message); }
     };
 
     window.logoutUser = () => signOut(auth);
 
-    function showAuthError(msg) {
-      const el = document.getElementById('auth-error-msg');
-      el.innerText = msg;
-      el.classList.remove('hidden');
-    }
+    // TÉLÉPORTATION CRÉDITS LOGIQUE
+    window.openTeleportModal = () => {
+      const currentTarget = window.appState.sharedData.targetDate;
+      const isUsed = window.appState.userProfile.teleportUsedForTarget === currentTarget;
+      const badge = document.getElementById('teleport-credit-badge');
+      const btn = document.getElementById('teleport-launch-btn');
+      const term = document.getElementById('teleport-terminal');
 
-    // Sauvegardes Firestore
-    window.savePrivateProfile = async () => {
-      if (!currentUser) return;
-      await setDoc(doc(db, "users", currentUser.uid), window.appState.userProfile, { merge: true });
+      if (isUsed) {
+        badge.innerText = "0/1 épuisé";
+        badge.className = "text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700";
+        btn.disabled = true;
+        btn.className = "w-full bg-slate-800 text-slate-500 text-xs font-bold py-2.5 rounded-xl cursor-not-allowed mb-2";
+        term.innerHTML = "> CRÉDIT ÉPUISÉ POUR CETTE PÉRIODE.<br>> Attendez les prochaines retrouvailles pour réinitialiser le système.";
+      } else {
+        badge.innerText = "1/1 disponible";
+        badge.className = "text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-800";
+        btn.disabled = false;
+        btn.className = "w-full bg-cyan-500 text-slate-900 text-xs font-bold py-2.5 rounded-xl shadow mb-2 hover:bg-cyan-400 transition";
+        term.innerHTML = "> Système prêt.<br>> Consomme 1 jeton de téléportation.";
+      }
+
+      document.getElementById('modal-teleport').classList.remove('hidden');
     };
 
-    window.saveSharedData = async () => {
+    window.runTeleportSequence = async () => {
+      const currentTarget = window.appState.sharedData.targetDate;
+      const term = document.getElementById('teleport-terminal');
+      const btn = document.getElementById('teleport-launch-btn');
+
+      btn.disabled = true;
+      term.innerHTML = "> Connexion aux satellites quantiques...<br>";
+
+      setTimeout(() => { term.innerHTML += "> Calcul des coordonnées du partenaire...<br>"; }, 1000);
+      setTimeout(() => { term.innerHTML += "> ERREUR 404 : Densité d'amour trop élevée pour la matière physique !<br>"; }, 2200);
+      setTimeout(async () => {
+        term.innerHTML += "<span class='text-amber-400'>> Crédit consommé. Conseil : Passez un coup de fil direct !</span>";
+        
+        // Enregistrer l'utilisation du crédit
+        window.appState.userProfile.teleportUsedForTarget = currentTarget;
+        await setDoc(doc(db, "users", currentUser.uid), { teleportUsedForTarget: currentTarget }, { merge: true });
+
+        document.getElementById('teleport-credit-badge').innerText = "0/1 épuisé";
+        document.getElementById('teleport-credit-badge').className = "text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700";
+      }, 3500);
+    };
+
+    // PHOTO HANDLER
+    window.handleMemoryImageSelect = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 800;
+          let w = img.width, h = img.height;
+          if (w > h && w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
+          else if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          selectedImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
+          
+          document.getElementById('upload-preview-img').src = selectedImageBase64;
+          document.getElementById('upload-preview-img').classList.remove('hidden');
+          document.getElementById('upload-placeholder').classList.add('hidden');
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.saveNewMemory = async () => {
+      const title = document.getElementById('memory-title-input').value.trim() || "Souvenir précieux";
+      const sub = document.getElementById('memory-subtitle-input').value.trim() || "";
+      if (!selectedImageBase64) return alert("Sélectionnez d'abord une photo !");
+
+      if (!window.appState.sharedData.memories) window.appState.sharedData.memories = [];
+      window.appState.sharedData.memories.unshift({
+        id: Date.now(), title, sub, img: selectedImageBase64, author: window.appState.userProfile.name || 'Moi', date: new Date().toLocaleDateString('fr-FR')
+      });
+
       await setDoc(doc(db, "couples", COUPLE_ROOM_ID), window.appState.sharedData, { merge: true });
+      selectedImageBase64 = null;
+      document.getElementById('upload-preview-img').classList.add('hidden');
+      document.getElementById('upload-placeholder').classList.remove('hidden');
+      window.closeModal('modal-memory');
     };
 
-    // Rendu Interface
-    window.renderUserProfile = () => {
-      const p = window.appState.userProfile;
-      document.getElementById('my-name-pill').innerText = `Compte : ${p.name || 'Inconnu'}`;
-      document.getElementById('setting-my-name').value = p.name || '';
-      document.getElementById('setting-my-phone').value = p.phone || '';
-      document.getElementById('objective-title-display').innerText = p.secretObjective || 'Ajouter une surprise...';
-      document.getElementById('modal-objective-title-input').value = p.secretObjective || '';
-    };
-
+    // RENDUS
     window.renderSharedContent = () => {
       const s = window.appState.sharedData;
-      
-      // Pensées
-      const thoughtsList = document.getElementById('thoughts-list');
-      thoughtsList.innerHTML = '';
-      if (s.thoughts && s.thoughts.length > 0) {
-        document.getElementById('latest-thought-text').innerText = `"${s.thoughts[0].text}"`;
-        document.getElementById('latest-thought-author-badge').innerText = `Pensée de ${s.thoughts[0].author}`;
-        s.thoughts.forEach(t => {
-          thoughtsList.innerHTML += `<div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm"><span class="text-[10px] font-bold text-brand-blue uppercase">${t.author}</span><p class="text-xs text-slate-700 italic mt-0.5">"${t.text}"</p></div>`;
-        });
-      }
-
-      // Souvenirs
       const gallery = document.getElementById('gallery-grid');
       gallery.innerHTML = '';
-      if (s.memories) {
+      if (s.memories && s.memories.length > 0) {
         s.memories.forEach(m => {
-          gallery.innerHTML += `<div class="bg-white rounded-2xl border p-2 shadow-sm"><h4 class="font-bold text-xs text-slate-800">${m.title}</h4><p class="text-[10px] text-slate-400">${m.sub}</p><span class="text-[9px] text-brand-blue font-bold">Par ${m.author}</span></div>`;
+          gallery.innerHTML += `
+            <div class="bg-white rounded-2xl overflow-hidden border p-2 shadow-sm relative group">
+              <div onclick="openPhotoViewer('${m.img}', '${m.title.replace(/'/g, "\\'")}', '${m.sub.replace(/'/g, "\\'")}')" class="h-32 w-full bg-slate-100 cursor-pointer overflow-hidden relative">
+                <img src="${m.img}" class="w-full h-full object-cover">
+                <span class="absolute top-2 left-2 bg-slate-900/60 text-white text-[9px] font-bold px-2 py-0.5 rounded-md">${m.author}</span>
+              </div>
+              <div class="p-2 flex justify-between items-center">
+                <h4 class="font-bold text-xs truncate">${m.title}</h4>
+              </div>
+            </div>`;
         });
       }
 
-      // Projets
-      const projects = document.getElementById('reunion-projects-list');
-      projects.innerHTML = '';
-      if (s.reunionProjects) {
-        document.getElementById('stat-projects-count').innerText = s.reunionProjects.length;
-        s.reunionProjects.forEach(p => {
-          projects.innerHTML += `<div class="p-2.5 bg-slate-50 border rounded-xl text-xs flex justify-between"><span>${p.text}</span><span class="text-[9px] font-bold text-slate-400">${p.author}</span></div>`;
+      const thoughtsList = document.getElementById('thoughts-list');
+      thoughtsList.innerHTML = '';
+      if (s.thoughts) {
+        s.thoughts.forEach(t => {
+          thoughtsList.innerHTML += `<div class="bg-white p-3 rounded-2xl border shadow-sm"><span class="text-[10px] font-bold text-brand-blue uppercase">${t.author}</span><p class="text-xs italic mt-0.5">"${t.text}"</p></div>`;
         });
       }
 
       window.updateCountdown();
+    };
+
+    window.renderUserProfile = () => {
+      const p = window.appState.userProfile;
+      document.getElementById('my-name-pill').innerText = `Compte : ${p.name || 'Moi'}`;
+      document.getElementById('setting-my-name').value = p.name || '';
+      document.getElementById('setting-my-phone').value = p.phone || '';
     };
 
     window.updateCountdown = () => {
@@ -548,68 +544,42 @@
 
     setInterval(window.updateCountdown, 1000);
 
-    // Handlers d'actions
-    window.saveNewThought = () => {
+    // ACTIONS
+    window.saveNewThought = async () => {
       const input = document.getElementById('thought-input-text');
       if (!input.value.trim()) return;
       if (!window.appState.sharedData.thoughts) window.appState.sharedData.thoughts = [];
-      window.appState.sharedData.thoughts.unshift({
-        text: input.value.trim(),
-        author: window.appState.userProfile.name || 'Moi'
-      });
-      window.saveSharedData();
+      window.appState.sharedData.thoughts.unshift({ text: input.value.trim(), author: window.appState.userProfile.name || 'Moi' });
+      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), window.appState.sharedData, { merge: true });
       input.value = '';
       window.closeModal('modal-thought');
     };
 
-    window.saveNewMemory = () => {
-      const title = document.getElementById('memory-title-input').value.trim();
-      const sub = document.getElementById('memory-subtitle-input').value.trim();
-      if (!title) return;
-      if (!window.appState.sharedData.memories) window.appState.sharedData.memories = [];
-      window.appState.sharedData.memories.unshift({
-        title, sub, author: window.appState.userProfile.name || 'Moi'
-      });
-      window.saveSharedData();
-      window.closeModal('modal-memory');
-    };
-
-    window.addNewReunionProject = () => {
+    window.addNewReunionProject = async () => {
       const input = document.getElementById('new-project-input');
       if (!input.value.trim()) return;
       if (!window.appState.sharedData.reunionProjects) window.appState.sharedData.reunionProjects = [];
-      window.appState.sharedData.reunionProjects.push({
-        text: input.value.trim(),
-        author: window.appState.userProfile.name || 'Moi'
-      });
-      window.saveSharedData();
+      window.appState.sharedData.reunionProjects.push({ text: input.value.trim(), author: window.appState.userProfile.name || 'Moi' });
+      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), window.appState.sharedData, { merge: true });
       input.value = '';
     };
 
-    window.saveCustomObjective = () => {
-      const val = document.getElementById('modal-objective-title-input').value.trim();
-      window.appState.userProfile.secretObjective = val;
-      window.savePrivateProfile();
-      window.renderUserProfile();
-      window.closeModal('modal-custom-objective');
-    };
-
-    window.saveMyPersonalProfile = () => {
+    window.saveMyPersonalProfile = async () => {
       window.appState.userProfile.name = document.getElementById('setting-my-name').value.trim();
       window.appState.userProfile.phone = document.getElementById('setting-my-phone').value.trim();
-      window.savePrivateProfile();
+      await setDoc(doc(db, "users", currentUser.uid), window.appState.userProfile, { merge: true });
       window.renderUserProfile();
     };
 
-    window.saveSharedCoupleDates = () => {
+    window.saveSharedCoupleDates = async () => {
       const val = document.getElementById('setting-target-date').value;
       if (val) {
         window.appState.sharedData.targetDate = val;
-        window.saveSharedData();
+        await setDoc(doc(db, "couples", COUPLE_ROOM_ID), window.appState.sharedData, { merge: true });
       }
     };
 
-    // UI Helpers
+    // UI HELPERS
     window.switchTab = (id) => {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
       document.getElementById(id).classList.remove('hidden');
@@ -618,19 +588,7 @@
     window.openThoughtModal = () => document.getElementById('modal-thought').classList.remove('hidden');
     window.openAddMemoryModal = () => document.getElementById('modal-memory').classList.remove('hidden');
     window.openReunionProjectsModal = () => document.getElementById('modal-reunion-projects').classList.remove('hidden');
-    window.openCustomObjectiveModal = () => document.getElementById('modal-custom-objective').classList.remove('hidden');
     window.openCallPartnerModal = () => document.getElementById('modal-call-partner').classList.remove('hidden');
-    window.openMessageGeneratorModal = () => document.getElementById('modal-message').classList.remove('hidden');
-    window.openBreathingModal = () => document.getElementById('modal-breathing').classList.remove('hidden');
-    window.triggerPanicEmergency = () => document.getElementById('modal-panic').classList.remove('hidden');
-    window.triggerDirectPhoneCall = () => {
-      const phone = window.appState.userProfile.phone;
-      if (phone) window.location.href = `tel:${phone}`;
-    };
-    window.triggerWhatsAppCall = () => {
-      const phone = window.appState.userProfile.phone;
-      if (phone) window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}`, '_blank');
-    };
   </script>
 </body>
 </html>
