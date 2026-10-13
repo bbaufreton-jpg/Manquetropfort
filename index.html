@@ -1,199 +1,487 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="h-full bg-slate-100">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Notre Espace Partagé</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gestion du Manque - Love Tracker Duo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #f4f6f9; color: #333; padding: 20px; }
-    .container { max-width: 800px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-    h1, h2 { color: #2c3e50; margin-bottom: 15px; }
-    .hidden { display: none; }
-    
-    /* Formulaires */
-    input, textarea, button { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; }
-    button { background-color: #3498db; color: white; font-weight: bold; border: none; cursor: pointer; transition: background 0.2s; }
-    button:hover { background-color: #2980b9; }
-    .btn-danger { background-color: #e74c3c; width: auto; padding: 8px 15px; }
-    .btn-danger:hover { background-color: #c0392b; }
-    
-    /* Layout */
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
-    .section-card { background: #fafafa; border: 1px solid #e1e8ed; padding: 18px; border-radius: 10px; margin-bottom: 25px; }
-    .item-list { list-style: none; margin-top: 10px; }
-    .item-card { background: white; border-left: 4px solid #3498db; padding: 12px; border-radius: 6px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .item-card.memory { border-left-color: #e67e22; }
-    .item-card small { color: #7f8c8d; display: block; margin-top: 5px; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .bg-brand-blue {
+      background-color: #0d41e1;
+    }
+    .bg-brand-darkblue {
+      background-color: #072ac8;
+    }
+    .text-brand-blue {
+      color: #0d41e1;
+    }
+    .border-brand-blue {
+      border-color: #0d41e1;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .panic-button {
+      background: linear-gradient(135deg, #ff416c, #ff4b2b);
+      box-shadow: 0 8px 22px rgba(255, 75, 43, 0.45);
+      animation: pulse-gentle 2.4s infinite;
+    }
+    @keyframes pulse-gentle {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    @keyframes ping-subtle {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.7; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .duo-sync-indicator {
+      animation: ping-subtle 3s infinite;
+    }
   </style>
 </head>
-<body>
+<body class="h-full flex justify-center items-center bg-slate-900 text-slate-800 antialiased sm:py-6">
 
-  <div class="container">
+  <div class="w-full max-w-md h-full sm:h-[844px] bg-slate-50 sm:rounded-[40px] shadow-2xl flex flex-col overflow-hidden relative border-0 sm:border-[8px] sm:border-slate-800">
     
-    <!-- PAGE DE CONNEXION -->
-    <div id="auth-section">
-      <h1>Bienvenue</h1>
-      <p style="margin-bottom: 15px; color: #666;">Connectez-vous pour accéder à votre espace personnel et partagé.</p>
-      <input type="email" id="email" placeholder="Adresse e-mail">
-      <input type="password" id="password" placeholder="Mot de passe">
-      <button onclick="login()">Se connecter</button>
-      <button onclick="register()" style="background-color: #2ecc71;">Créer un compte</button>
-      <p id="auth-error" style="color: red; margin-top: 10px;"></p>
-    </div>
-
-    <!-- APPLICATION (Visible après connexion) -->
-    <div id="app-section" class="hidden">
-      <div class="header">
-        <h2>Espace de <span id="user-email" style="color: #3498db;"></span></h2>
-        <button onclick="logout()" class="btn-danger">Déconnexion</button>
-      </div>
-
-      <!-- SECTION PRIVÉE -->
-      <div class="section-card">
-        <h2>🔒 Mes Infos / Notes Privées</h2>
-        <p style="font-size: 13px; color: #777; margin-bottom: 10px;">Ces informations ne sont visibles que par vous.</p>
-        <textarea id="private-input" placeholder="Ajouter une note personnelle..."></textarea>
-        <button onclick="addPrivateNote()">Enregistrer la note</button>
-        <ul id="private-list" class="item-list"></ul>
-      </div>
-
-      <!-- SECTION PARTAGÉE -->
-      <div class="section-card" style="border-color: #f39c12;">
-        <h2>🧡 Souvenirs Partagés</h2>
-        <p style="font-size: 13px; color: #777; margin-bottom: 10px;">Ces souvenirs sont visibles et synchronisés en temps réel pour les deux utilisateurs.</p>
-        <input type="text" id="memory-title" placeholder="Titre du souvenir">
-        <textarea id="memory-desc" placeholder="Racontez le souvenir..."></textarea>
-        <button onclick="addSharedMemory()" style="background-color: #e67e22;">Ajouter le souvenir</button>
-        <ul id="shared-list" class="item-list"></ul>
+    <!-- Top Mobile Simulation Notch -->
+    <div class="hidden sm:flex justify-between items-center px-6 pt-3 pb-1 bg-brand-blue text-white text-xs font-semibold z-50">
+      <span id="notch-clock">09:41</span>
+      <div class="w-20 h-4 bg-slate-900 rounded-full mx-auto"></div>
+      <div class="flex items-center space-x-1.5">
+        <i class="fas fa-signal"></i>
+        <i class="fas fa-wifi"></i>
+        <i class="fas fa-battery-full"></i>
       </div>
     </div>
 
-  </div>
+    <!-- Live Toast Banner -->
+    <div id="toast-banner" class="fixed top-4 left-1/2 -translate-x-1/2 max-w-xs w-full bg-slate-900/95 text-white text-xs font-medium px-4 py-3 rounded-2xl shadow-xl z-[100] transform -translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2.5">
+      <i id="toast-icon" class="fas fa-check-circle text-emerald-400 text-base"></i>
+      <span id="toast-message">Action effectuée</span>
+    </div>
 
-  <!-- SCRIPTS FIREBASE -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    // Vos clés de configuration Firebase obtenues à l'écran
-    const firebaseConfig = {
-      apiKey: "AIzaSyCMVojNde1zUs8pNn7Lkw5oxZb2hbhGAq0",
-      authDomain: "manque-trop-fort.firebaseapp.com",
-      projectId: "manque-trop-fort",
-      storageBucket: "manque-trop-fort.firebasestorage.app",
-      messagingSenderId: "784351605587",
-      appId: "1:784351605587:web:8655e0beea44eb9be7edb4"
-    };
-
-    // Initialisation
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    let currentUser = null;
-
-    // Gestion de la connexion / déconnexion
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUser = user;
-        document.getElementById('auth-section').classList.add('hidden');
-        document.getElementById('app-section').classList.remove('hidden');
-        document.getElementById('user-email').textContent = user.email;
+    <!-- MAIN SCROLLABLE WRAPPER -->
+    <main id="app-container" class="flex-1 overflow-y-auto hide-scrollbar pb-24 relative">
+      
+      <section id="tab-accueil" class="tab-content transition-opacity duration-300">
         
-        loadPrivateNotes();
-        loadSharedMemories();
-      } else {
-        currentUser = null;
-        document.getElementById('auth-section').classList.remove('hidden');
-        document.getElementById('app-section').classList.add('hidden');
-      }
-    });
+        <!-- Header Banner with dual account toggle -->
+        <div class="bg-brand-blue text-white pt-6 pb-14 px-6 rounded-b-[36px] relative shadow-md">
+          
+          <div class="flex justify-between items-center mb-3">
+            <!-- Authenticated User Profile Badge -->
+            <button onclick="openAccountAuthModal()" class="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-md pl-1.5 pr-3 py-1 rounded-full text-[11px] font-bold text-white transition border border-white/20">
+              <span id="my-avatar-badge" class="w-5 h-5 rounded-full bg-white text-brand-blue flex items-center justify-center text-xs shadow-sm">👦</span>
+              <span class="truncate max-w-[100px]" id="my-name-pill">Compte : Ben</span>
+              <i class="fas fa-lock text-[9px] opacity-70"></i>
+            </button>
 
-    // Fonctions d'Authentification
-    window.login = async () => {
-      const email = document.getElementById('email').value;
-      const pass = document.getElementById('password').value;
-      try {
-        await signInWithEmailAndPassword(auth, email, pass);
-      } catch (err) {
-        document.getElementById('auth-error').textContent = "Erreur : " + err.message;
-      }
-    };
+            <!-- Duo Sync Indicator -->
+            <button onclick="openDuoSyncModal()" class="inline-flex items-center gap-1.5 bg-black/20 hover:bg-black/30 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-semibold text-white transition border border-white/10">
+              <span id="duo-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 duo-sync-indicator"></span>
+              <span id="duo-room-header-badge">Salon Duo</span>
+              <i class="fas fa-link text-[10px] ml-0.5 opacity-70"></i>
+            </button>
+          </div>
 
-    window.register = async () => {
-      const email = document.getElementById('email').value;
-      const pass = document.getElementById('password').value;
-      try {
-        await createUserWithEmailAndPassword(auth, email, pass);
-      } catch (err) {
-        document.getElementById('auth-error').textContent = "Erreur : " + err.message;
-      }
-    };
+          <div class="mb-4">
+            <span class="text-blue-200 text-[11px] uppercase tracking-wider font-bold flex items-center gap-1.5">
+              <span>Espace personnel connecté</span>
+              <i class="fas fa-heart text-rose-300 text-[9px]"></i>
+            </span>
+            <h1 class="text-3xl font-extrabold tracking-tight mt-0.5" id="display-title">
+              Le manque de <span class="partner-name-text">Lauriane</span>
+            </h1>
+          </div>
 
-    window.logout = () => signOut(auth);
+          <!-- Main Countdown Glass Box -->
+          <div class="glass-card rounded-3xl p-5 text-center shadow-lg relative overflow-hidden">
+            <div class="absolute -right-4 -top-4 opacity-10">
+              <i class="fas fa-heart text-8xl text-white"></i>
+            </div>
+            
+            <div class="flex justify-center items-center gap-1.5 text-amber-300 text-xs sm:text-sm font-semibold mb-2">
+              <i class="fas fa-sparkles"></i>
+              <span>Compte à rebours avant de revoir <span class="partner-name-text">Lauriane</span> :</span>
+              <i class="fas fa-sparkles"></i>
+            </div>
 
-    // Ajouter / Charger Notes Privées
-    window.addPrivateNote = async () => {
-      const text = document.getElementById('private-input').value;
-      if (!text) return;
-      await addDoc(collection(db, "private_notes"), {
-        userId: currentUser.uid,
-        content: text,
-        createdAt: serverTimestamp()
-      });
-      document.getElementById('private-input').value = '';
-    };
+            <!-- Numbers Counter -->
+            <div class="my-3 flex justify-center items-baseline gap-2 sm:gap-3">
+              <div class="flex flex-col">
+                <span class="text-3xl sm:text-4xl font-extrabold" id="cd-days">00</span>
+                <span class="text-[10px] uppercase tracking-wider text-blue-200 font-semibold">Jours</span>
+              </div>
+              <span class="text-2xl sm:text-3xl font-light text-blue-300">:</span>
+              <div class="flex flex-col">
+                <span class="text-3xl sm:text-4xl font-extrabold" id="cd-hours">00</span>
+                <span class="text-[10px] uppercase tracking-wider text-blue-200 font-semibold">Heures</span>
+              </div>
+              <span class="text-2xl sm:text-3xl font-light text-blue-300">:</span>
+              <div class="flex flex-col">
+                <span class="text-3xl sm:text-4xl font-extrabold" id="cd-mins">00</span>
+                <span class="text-[10px] uppercase tracking-wider text-blue-200 font-semibold">Mins</span>
+              </div>
+              <span class="text-2xl sm:text-3xl font-light text-blue-300">:</span>
+              <div class="flex flex-col">
+                <span class="text-3xl sm:text-4xl font-extrabold" id="cd-secs">00</span>
+                <span class="text-[10px] uppercase tracking-wider text-blue-200 font-semibold">Secs</span>
+              </div>
+            </div>
 
-    function loadPrivateNotes() {
-      const q = query(
-        collection(db, "private_notes"), 
-        where("userId", "==", currentUser.uid)
-      );
-      onSnapshot(q, (snapshot) => {
-        const list = document.getElementById('private-list');
-        list.innerHTML = '';
-        snapshot.forEach(doc => {
-          const item = doc.data();
-          list.innerHTML += `<li class="item-card"><p>${item.content}</p></li>`;
-        });
-      });
-    }
+            <p class="text-blue-100 font-medium text-sm mt-1" id="sleeps-summary">Plus que 2 dodos ! 🌙</p>
 
-    // Ajouter / Charger Souvenirs Partagés
-    window.addSharedMemory = async () => {
-      const title = document.getElementById('memory-title').value;
-      const desc = document.getElementById('memory-desc').value;
-      if (!title || !desc) return;
+            <div class="mt-4 pt-3 border-t border-white/20 inline-flex items-center gap-2 text-xs text-blue-200 bg-black/15 px-3 py-1.5 rounded-full">
+              <i class="far fa-calendar-alt"></i>
+              <span id="start-date-display">Séparés depuis le début</span>
+            </div>
+          </div>
+        </div>
 
-      await addDoc(collection(db, "shared_memories"), {
-        title: title,
-        description: desc,
-        author: currentUser.email,
-        createdAt: serverTimestamp()
-      });
+        <div class="px-5 -mt-8 grid grid-cols-2 gap-3 relative z-10">
+          <!-- Card 1: Dodos Restants -->
+          <div onclick="switchTab('tab-calendrier')" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition cursor-pointer">
+            <div class="flex justify-between items-start">
+              <div class="w-10 h-10 rounded-xl bg-blue-50 text-brand-blue flex items-center justify-center text-lg">
+                <i class="fas fa-bed"></i>
+              </div>
+              <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
+            </div>
+            <div class="mt-3">
+              <div class="text-2xl font-bold text-slate-900" id="stat-dodos">2</div>
+              <p class="text-xs font-semibold text-slate-500 mt-0.5 leading-tight">Dodos restants avant la retrouvaille</p>
+            </div>
+          </div>
 
-      document.getElementById('memory-title').value = '';
-      document.getElementById('memory-desc').value = '';
-    };
+          <!-- Card 2: Shared Bucket List -->
+          <div onclick="openReunionProjectsModal()" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition cursor-pointer group">
+            <div class="flex justify-between items-start">
+              <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg group-hover:scale-105 transition">
+                <i class="fas fa-champagne-glasses"></i>
+              </div>
+              <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
+            </div>
+            <div class="mt-3">
+              <div class="text-2xl font-bold text-slate-900" id="stat-projects-count">3</div>
+              <p class="text-xs font-semibold text-slate-500 mt-0.5 leading-tight">Projets prévus pour fêter ça</p>
+            </div>
+          </div>
+        </div>
 
-    function loadSharedMemories() {
-      const q = query(collection(db, "shared_memories"));
-      onSnapshot(q, (snapshot) => {
-        const list = document.getElementById('shared-list');
-        list.innerHTML = '';
-        snapshot.forEach(doc => {
-          const item = doc.data();
-          list.innerHTML += `
-            <li class="item-card memory">
-              <strong>${item.title}</strong>
-              <p>${item.description}</p>
-              <small>Ajouté par : ${item.author}</small>
-            </li>`;
-        });
-      });
-    }
-  </script>
-</body>
-</html>
+        <!-- Personal Goal Gauge (Custom to the user) -->
+        <div class="px-5 mt-3">
+          <div onclick="openCustomObjectiveModal()" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition cursor-pointer group">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg group-hover:rotate-6 transition">
+                  <i class="fas fa-gift" id="objective-card-icon"></i>
+                </div>
+                <div class="text-left">
+                  <div class="flex items-center gap-1.5">
+                    <h4 class="font-bold text-sm text-slate-900 leading-tight" id="objective-title-display">Cadeau pour elle</h4>
+                    <i class="fas fa-pen text-[10px] text-slate-300 group-hover:text-indigo-500 transition"></i>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-0.5" id="gift-progress-text">atteint dans 2 jours</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span id="gift-percent-badge" class="text-xs font-extrabold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg">50%</span>
+                <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
+              </div>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-2.5 mt-2 overflow-hidden">
+              <div id="gift-progress-bar" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-500" style="width: 50%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Action Carousel Cards -->
+        <div class="px-5 mt-5 flex justify-between items-center">
+          <h3 class="font-bold text-base text-slate-900">Mes pensées partagées</h3>
+          <button onclick="switchTab('tab-photos')" class="text-xs font-bold text-brand-blue hover:underline">Tout voir</button>
+        </div>
+
+        <div class="px-5 mt-2.5 grid grid-cols-2 gap-3">
+          <div onclick="openThoughtModal()" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center cursor-pointer hover:bg-slate-50 transition group">
+            <div class="w-12 h-12 rounded-full bg-sky-50 text-brand-blue flex items-center justify-center text-xl mb-2 group-hover:scale-110 transition">
+              <i class="far fa-comment-dots"></i>
+            </div>
+            <span class="text-xs font-bold text-slate-800">Écrire une pensée</span>
+            <span class="text-[10px] text-slate-400 mt-0.5" id="thought-btn-author-hint">Signé par moi</span>
+          </div>
+
+          <div onclick="switchTab('tab-soutien')" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center cursor-pointer hover:bg-slate-50 transition group">
+            <div class="w-12 h-12 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center text-xl mb-2 group-hover:scale-110 transition">
+              <i class="fas fa-heart-circle-check"></i>
+            </div>
+            <span class="text-xs font-bold text-slate-800">SOS Manque</span>
+            <span class="text-[10px] text-slate-400 mt-0.5">Appel, messages & calme</span>
+          </div>
+        </div>
+
+        <!-- Recent Thought Feed -->
+        <div class="px-5 mt-4">
+          <div class="bg-blue-50/70 rounded-2xl p-4 border border-blue-100">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[10px] font-bold text-brand-blue uppercase tracking-wider" id="latest-thought-author-badge">Dernière pensée de Lauriane</span>
+              <span class="text-[10px] text-slate-400" id="latest-thought-time">Récemment</span>
+            </div>
+            <p class="text-xs italic text-slate-700 leading-relaxed" id="latest-thought-text">
+              "J'ai vu cette pâtisserie que tu adores en rentrant, j'ai trop hâte qu'on y aille ensemble !"
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-soutien" class="tab-content hidden p-5 space-y-5">
+        <div class="flex items-center justify-between pt-2">
+          <h2 class="text-2xl font-extrabold text-slate-900">Mon soutien</h2>
+          <span class="text-xs font-semibold bg-blue-100 text-brand-blue px-2.5 py-1 rounded-full">Module SOS</span>
+        </div>
+
+        <!-- Big Hero Card personalized to partner -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm relative overflow-hidden">
+          <div class="flex gap-4 items-start">
+            <div class="w-24 h-24 grid grid-cols-2 gap-1.5 p-2 bg-slate-100 rounded-2xl flex-shrink-0">
+              <div class="bg-indigo-500 text-white rounded-lg flex items-center justify-center text-xs"><i class="fas fa-comment"></i></div>
+              <div class="bg-rose-400 text-white rounded-lg flex items-center justify-center text-xs"><i class="fas fa-envelope"></i></div>
+              <div class="bg-blue-600 text-white rounded-lg flex items-center justify-center text-xs"><i class="fas fa-phone"></i></div>
+              <div class="bg-sky-400 text-white rounded-lg flex items-center justify-center text-xs"><i class="fas fa-image"></i></div>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-bold text-slate-900 text-base leading-snug">Gérer le manque de <span class="partner-name-text">Lauriane</span></h3>
+              <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                Solutions d'urgence pour le manque de <span class="partner-name-text">Lauriane</span> : des messages aux photos, en passant par les appels et... une solution extrême !
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Support Actions List -->
+        <div>
+          <h3 class="text-sm font-bold text-slate-800 mb-3">Je trouve du soutien</h3>
+          <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-100">
+            
+            <button onclick="openMessageGeneratorModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition text-left">
+              <div class="flex items-center gap-3.5">
+                <div class="w-10 h-10 rounded-full bg-brand-blue text-white flex items-center justify-center text-base">
+                  <i class="fas fa-comment-dots"></i>
+                </div>
+                <span class="font-semibold text-sm text-slate-800">Lui envoyer un message</span>
+              </div>
+              <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
+            </button>
+
+            <button onclick="switchTab('tab-photos')" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition text-left">
+              <div class="flex items-center gap-3.5">
+                <div class="w-10 h-10 rounded-full bg-brand-blue text-white flex items-center justify-center text-base">
+                  <i class="fas fa-image"></i>
+                </div>
+                <span class="font-semibold text-sm text-slate-800">Regarder sa photo</span>
+              </div>
+              <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
+            </button>
+
+            <!-- Directly Calls the Partner's Saved Phone Number -->
+            <button onclick="openCallPartnerModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition text-left">
+              <div class="flex items-center gap-3.5">
+                <div class="w-10 h-10 rounded-full bg-brand-blue text-white flex items-center justify-center text-base">
+                  <i class="fas fa-phone"></i>
+                </div>
+                <div>
+                  <span class="font-semibold text-sm text-slate-800 block">Lui téléphoner</span>
+                  <span class="text-[10px] text-slate-400" id="call-subtitle-preview">GSM, WhatsApp Audio ou FaceTime</span>
+                </div>
+              </div>
+              <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
+            </button>
+
+            <button onclick="openBreathingModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition text-left">
+              <div class="flex items-center gap-3.5">
+                <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center text-base">
+                  <i class="fas fa-wind"></i>
+                </div>
+                <div>
+                  <span class="font-semibold text-sm text-slate-800 block">Respiration anti-stress</span>
+                  <span class="text-[10px] text-slate-500">Apaiser la sensation de manque</span>
+                </div>
+              </div>
+              <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
+            </button>
+
+            <button onclick="openTeleportModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition text-left bg-gradient-to-r from-blue-50/40 to-indigo-50/40">
+              <div class="flex items-center gap-3.5">
+                <div class="w-10 h-10 rounded-full bg-slate-900 text-cyan-300 flex items-center justify-center text-base shadow-sm">
+                  <i class="fas fa-atom"></i>
+                </div>
+                <div>
+                  <span class="font-bold text-sm text-slate-900 block">Mode extrême : se téléporter à elle</span>
+                  <span class="text-[10px] text-slate-500">(Nécessite la technologie expérimentale)</span>
+                </div>
+              </div>
+              <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
+            </button>
+
+          </div>
+        </div>
+
+        <!-- Tips and testimonies -->
+        <div>
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-sm font-bold text-slate-800">Témoignages et astuces de couple</h3>
+          </div>
+
+          <div class="space-y-3">
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="font-bold text-sm text-brand-blue">Comment on a géré la distance</h4>
+                <i class="fas fa-quote-right text-slate-200 text-sm"></i>
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                "On s'est fixé des rituels de vidéo-conférence chaque soir. Ça m'aide beaucoup à me sentir proche d'elle, même séparés."
+              </p>
+              <span class="text-[10px] font-semibold text-slate-400 mt-2 block">— Thomas & Clara</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-photos" class="tab-content hidden p-5 space-y-4">
+        <div class="flex justify-between items-center pt-2">
+          <div>
+            <h2 class="text-2xl font-extrabold text-slate-900">Souvenirs Duo</h2>
+            <span class="text-[11px] text-emerald-600 font-medium"><i class="fas fa-cloud-arrow-up mr-1"></i>Galerie partagée</span>
+          </div>
+          <button onclick="openAddMemoryModal()" class="bg-brand-blue text-white text-xs px-3.5 py-2 rounded-xl font-semibold shadow hover:bg-brand-darkblue transition">
+            + Ajouter une photo
+          </button>
+        </div>
+
+        <p class="text-xs text-slate-500">
+          Chaque photo ajoutée est instantanément visible sur le téléphone de <span class="partner-name-text">Lauriane</span> avec votre signature.
+        </p>
+
+        <!-- Photo Grid -->
+        <div class="grid grid-cols-2 gap-3" id="gallery-grid">
+          <!-- Dynamically filled -->
+        </div>
+
+        <!-- Thoughts log -->
+        <div class="pt-2">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="text-sm font-bold text-slate-800">Journal de nos pensées</h3>
+            <button onclick="openThoughtModal()" class="text-xs font-bold text-brand-blue">+ Écrire</button>
+          </div>
+          <div class="space-y-2.5" id="thoughts-list">
+            <!-- Dynamically filled -->
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-calendrier" class="tab-content hidden p-5 space-y-4">
+        <div class="pt-2">
+          <h2 class="text-2xl font-extrabold text-slate-900">Suivi des Retrouvailles</h2>
+          <p class="text-xs text-slate-500 mt-1">Calculé en temps réel selon la date commune du couple.</p>
+        </div>
+
+        <!-- Dynamic Milestones Timeline -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-4">
+          <h3 class="font-bold text-sm text-slate-800">Étapes jusqu'aux retrouvailles</h3>
+
+          <div class="relative border-l-2 border-brand-blue/30 ml-3 pl-5 space-y-6">
+            <div class="relative">
+              <div class="absolute -left-[27px] top-0.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow"></div>
+              <h4 class="text-xs font-bold text-slate-800">Départ / Séparation</h4>
+              <p class="text-[11px] text-slate-500" id="timeline-start-date">Début de l'attente</p>
+            </div>
+
+            <div class="relative">
+              <div class="absolute -left-[27px] top-0.5 w-4 h-4 rounded-full bg-brand-blue border-2 border-white shadow animate-ping"></div>
+              <div class="absolute -left-[27px] top-0.5 w-4 h-4 rounded-full bg-brand-blue border-2 border-white shadow"></div>
+              <h4 class="text-xs font-bold text-brand-blue">Aujourd'hui</h4>
+              <p class="text-[11px] text-slate-500" id="timeline-current-status">Vous progressez ensemble chaque seconde !</p>
+            </div>
+
+            <div class="relative">
+              <div class="absolute -left-[27px] top-0.5 w-4 h-4 rounded-full bg-amber-500 border-2 border-white shadow"></div>
+              <h4 class="text-xs font-bold text-slate-800">Jour J : Retrouvailles ! 🎉</h4>
+              <p class="text-[11px] text-slate-600 font-semibold" id="timeline-target-date">Calcul en cours...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Calendar Dodos Grid -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-sm text-slate-800">Calendrier des dodos</h3>
+            <span class="text-[11px] font-semibold text-brand-blue bg-blue-50 px-2 py-0.5 rounded-full" id="dodos-badge">0 dodos</span>
+          </div>
+          <div class="grid grid-cols-7 gap-1.5 text-center text-xs" id="dodos-grid">
+            <!-- Dynamically generated according to target date -->
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-profil" class="tab-content hidden p-5 space-y-4">
+        <div class="pt-2 flex justify-between items-center">
+          <div>
+            <h2 class="text-2xl font-extrabold text-slate-900">Mon Compte</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Espace personnel & jumelage duo.</p>
+          </div>
+          <button onclick="openAccountAuthModal()" class="bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-200 transition flex items-center gap-1.5">
+            <i class="fas fa-arrow-right-from-bracket text-xs"></i>
+            Changer de profil
+          </button>
+        </div>
+
+        <!-- Active Identity Banner -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-4 text-white shadow-md">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-2xl border border-white/20" id="profile-card-avatar">
+                👦
+              </div>
+              <div>
+                <span class="text-[10px] uppercase tracking-wider text-blue-200 font-bold block">Votre profil actif sur cet appareil</span>
+                <span class="font-extrabold text-base" id="profile-card-name">Ben</span>
+                <span class="text-[10px] text-blue-200 block" id="profile-card-target-text">Jumelé avec Lauriane</span>
+              </div>
+            </div>
+            <button onclick="copyDuoInviteLink()" class="bg-white text-brand-blue text-xs font-bold px-3 py-2 rounded-xl shadow hover:bg-blue-50 transition flex items-center gap-1">
+              <i class="fas fa-share-nodes"></i> Inviter
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 1: Mon Propre Compte (Unique et éditable uniquement par moi) -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-3.5">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
+            <span class="text-base">👤</span>
+            <div>
+              <h3 class="text-sm font-bold text-slate-800">Mes Informations Personnelles</h3>
+              <p class="text-[10px] text-slate-400">Modifiables uniquement depuis votre smartphone</p>
+            </div>
+          </div>
+
+          <div>
+            <label class="text
