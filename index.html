@@ -333,7 +333,26 @@
       </button>
     </nav>
 
-    <!-- MODAL FENÊTRE SOS URGENCE EXTRÊME (SANS BOUNCE) -->
+    <!-- LIGHTBOX / VISIONNEUSE PHOTO PLEIN ÉCRAN -->
+    <div id="modal-photo-viewer" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col justify-between p-4 z-50 hidden" onclick="closeModal('modal-photo-viewer')">
+      <div class="flex justify-between items-center text-white pt-2" onclick="event.stopPropagation()">
+        <div>
+          <h4 id="viewer-photo-title" class="text-xs font-bold">Photo</h4>
+          <span id="viewer-photo-author" class="text-[10px] text-slate-400"></span>
+        </div>
+        <button onclick="closeModal('modal-photo-viewer')" class="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+      <div class="flex-1 flex items-center justify-center my-4 overflow-hidden" onclick="event.stopPropagation()">
+        <img id="viewer-photo-img" src="" class="max-h-[70vh] max-w-full rounded-2xl object-contain shadow-2xl">
+      </div>
+      <div class="text-center pb-2" onclick="event.stopPropagation()">
+        <p id="viewer-photo-sub" class="text-xs text-slate-300 font-medium"></p>
+      </div>
+    </div>
+
+    <!-- MODAL FENÊTRE SOS URGENCE EXTRÊME -->
     <div id="modal-panic" class="fixed inset-0 bg-rose-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
       <div class="bg-white w-full max-w-xs rounded-3xl p-6 text-center shadow-2xl relative border-2 border-rose-500">
         <div class="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto text-2xl mb-3 shadow-inner">
@@ -630,6 +649,14 @@
       window.showToast("Projet ajouté !");
     };
 
+    window.openPhotoViewer = (img, title, sub, author) => {
+      document.getElementById('viewer-photo-img').src = img;
+      document.getElementById('viewer-photo-title').innerText = title;
+      document.getElementById('viewer-photo-sub').innerText = sub;
+      document.getElementById('viewer-photo-author').innerText = "Par " + (author || 'Duo');
+      document.getElementById('modal-photo-viewer').classList.remove('hidden');
+    };
+
     window.renderUserProfile = () => {
       const p = window.appState.userProfile;
       document.getElementById('my-name-pill').innerText = `Compte : ${p.name || 'Moi'}`;
@@ -663,7 +690,7 @@
           const style = window.getAuthorStyles(m.author);
           gallery.innerHTML += `
             <div class="bg-white rounded-2xl overflow-hidden border ${style.border} shadow-sm flex flex-col justify-between relative group">
-              <div class="h-32 w-full bg-slate-100 overflow-hidden relative">
+              <div onclick="openPhotoViewer('${m.img}', '${m.title.replace(/'/g, "\\'")}', '${m.sub.replace(/'/g, "\\'")}', '${m.author}')" class="h-32 w-full bg-slate-100 cursor-pointer overflow-hidden relative">
                 <img src="${m.img}" class="w-full h-full object-cover">
                 <span class="absolute top-2 left-2 border backdrop-blur-md font-bold px-2 py-0.5 rounded-md text-[9px] ${style.badge}">${m.author}</span>
               </div>
