@@ -158,7 +158,7 @@
             <span class="text-xs font-bold text-slate-800">Écrire une pensée</span>
           </div>
 
-          <!-- SOS MANQUE : BOUTON URGENCE EXTRÊME -->
+          <!-- SOS MANQUE -->
           <div onclick="triggerPanicEmergency()" class="panic-button text-white p-4 rounded-2xl shadow-lg flex flex-col items-center text-center cursor-pointer transition transform hover:scale-105 border-2 border-white/40">
             <div class="w-12 h-12 rounded-full bg-white/20 text-white flex items-center justify-center text-xl mb-2 shadow-inner">
               <i class="fas fa-heart-crack text-white animate-pulse"></i>
@@ -333,9 +333,9 @@
       </button>
     </nav>
 
-    <!-- MODAL FENÊTRE FORTE SOS URGENCE EXTRÊME -->
+    <!-- MODAL FENÊTRE SOS URGENCE EXTRÊME (SANS BOUNCE) -->
     <div id="modal-panic" class="fixed inset-0 bg-rose-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
-      <div class="bg-white w-full max-w-xs rounded-3xl p-6 text-center shadow-2xl relative animate-bounce border-2 border-rose-500">
+      <div class="bg-white w-full max-w-xs rounded-3xl p-6 text-center shadow-2xl relative border-2 border-rose-500">
         <div class="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto text-2xl mb-3 shadow-inner">
           <i class="fas fa-heart text-2xl animate-pulse"></i>
         </div>
@@ -729,7 +729,6 @@
       document.getElementById('dodos-badge').innerText = `${days} dodos`;
       document.getElementById('sleeps-summary').innerText = `Plus que ${days} dodo${days > 1 ? 's' : ''} ! 🌙`;
 
-      // CALCUL ET DYNAMISME JAUGE PROGRESSION
       const totalSpan = Math.max(1, target - start);
       const elapsedSpan = Math.max(0, now - start);
       const percent = Math.min(100, Math.max(0, Math.round((elapsedSpan / totalSpan) * 100)));
