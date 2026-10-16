@@ -612,21 +612,12 @@
       }
     };
 
-    // DEMANDER PERMISSION NOTIFICATION PWA
-    window.requestNotificationPermission = () => {
-      if ("Notification" in window && Notification.permission !== "granted") {
-        Notification.requestPermission();
-      }
-    };
-
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('app-container').classList.remove('hidden');
         document.getElementById('app-nav').classList.remove('hidden');
-
-        window.requestNotificationPermission();
 
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
@@ -719,6 +710,11 @@
 
     // ENVOI PING AMOUR & EFFET NOTIFICATION
     window.sendLovePing = async () => {
+      // Demander la permission iOS/Android au moment du clic
+      if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+        await Notification.requestPermission();
+      }
+
       const me = window.appState.userProfile.name || 'Moi';
       await setDoc(doc(db, "couples", COUPLE_ROOM_ID), {
         lastLovePing: { sender: me, time: Date.now() }
