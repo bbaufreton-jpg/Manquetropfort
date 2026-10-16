@@ -237,16 +237,6 @@
             <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
           </button>
 
-          <button onclick="switchTab('tab-photos')" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition text-left">
-            <div class="flex items-center gap-3.5">
-              <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-base shadow-sm">
-                <i class="fas fa-image"></i>
-              </div>
-              <span class="font-bold text-sm text-slate-800">Regarder sa photo</span>
-            </div>
-            <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
-          </button>
-
           <button onclick="openCallPartnerModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition text-left">
             <div class="flex items-center gap-3.5">
               <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-base shadow-sm">
@@ -254,7 +244,7 @@
               </div>
               <div>
                 <span class="font-bold text-sm text-slate-800 block">Lui téléphoner</span>
-                <span id="soutien-phone-sub" class="text-[11px] text-slate-400 font-medium">Lauriane : 0612022421</span>
+                <span id="soutien-phone-sub" class="text-[11px] text-slate-400 font-medium">Chargement du numéro...</span>
               </div>
             </div>
             <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
@@ -274,15 +264,15 @@
             <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
           </button>
 
-          <!-- TÉLÉPORTATION QUANTIQUE -->
+          <!-- TÉLÉPORTATION -->
           <button onclick="openTeleportModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition text-left">
             <div class="flex items-center gap-3.5">
               <div class="w-10 h-10 rounded-full bg-slate-900 text-cyan-400 flex items-center justify-center text-base shadow-sm">
                 <i class="fas fa-atom"></i>
               </div>
               <div>
-                <span class="font-bold text-sm text-slate-800 block">Mode extrême : se téléporter à elle</span>
-                <span class="text-[11px] text-slate-400 font-medium">(Nécessite la technologie expérimentale)</span>
+                <span class="font-bold text-sm text-slate-800 block">Téléportation</span>
+                <span class="text-[11px] text-slate-400 font-medium">1 seul essai par période de manque</span>
               </div>
             </div>
             <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
@@ -493,7 +483,7 @@
       </div>
     </div>
 
-    <!-- AUTRES MODALS -->
+    <!-- MODAL APPEL -->
     <div id="modal-call-partner" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
       <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl text-center">
         <h3 class="text-base font-extrabold text-slate-900 mb-1">Appeler <span id="call-modal-partner-name">l'autre</span></h3>
@@ -575,7 +565,7 @@
         <div class="w-14 h-14 bg-cyan-500/20 text-cyan-400 rounded-full flex items-center justify-center mx-auto text-2xl mb-3">
           <i class="fas fa-atom animate-spin"></i>
         </div>
-        <h3 class="text-base font-extrabold text-white mb-1">Téléportation Quantique</h3>
+        <h3 class="text-base font-extrabold text-white mb-1">Téléportation</h3>
         <p class="text-[11px] text-slate-400 mb-3" id="teleport-modal-status">1 crédit disponible par période de manque.</p>
         <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-left font-mono text-[10px] text-cyan-400 mb-4 h-24 overflow-y-auto" id="teleport-terminal">
           > Système prêt.<br>> Crédit disponible : 1/1.
@@ -591,7 +581,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, onSnapshot, setDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCMVojNde1zUs8pNn7Lkw5oxZb2hbhGAq0",
@@ -611,6 +601,7 @@
     let selectedImageBase64 = null;
     let breathInterval = null;
     let breathIsRunning = false;
+    let partnerPhone = "";
 
     window.appState = {
       userProfile: { name: "", phone: "", teleportUsedForTarget: "", mood: "" },
@@ -634,6 +625,9 @@
         } else {
           window.appState.userProfile = { name: user.email.split('@')[0], phone: "", teleportUsedForTarget: "", mood: "" };
         }
+
+        // Récupération des profils pour trouver le numéro du partenaire
+        window.fetchPartnerProfile();
 
         onSnapshot(doc(db, "couples", COUPLE_ROOM_ID), (snapshot) => {
           if (snapshot.exists()) {
@@ -663,10 +657,40 @@
       } else {
         currentUser = null;
         document.getElementById('auth-screen').classList.remove('hidden');
-        document.getElementById('app-container').classList.remove('hidden');
+        document.getElementById('app-container').classList.add('hidden');
         document.getElementById('app-nav').classList.add('hidden');
       }
     });
+
+    window.fetchPartnerProfile = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "users"));
+        querySnapshot.forEach((docSnap) => {
+          if (docSnap.id !== currentUser.uid) {
+            const data = docSnap.data();
+            if (data.phone) {
+              partnerPhone = data.phone;
+              window.updatePartnerPhoneUI();
+            }
+          }
+        });
+      } catch (e) { console.log(e); }
+    };
+
+    window.updatePartnerPhoneUI = () => {
+      const me = window.appState.userProfile.name || 'Moi';
+      const isLauriane = me.toLowerCase().includes('lauriane');
+      const partnerName = isLauriane ? 'Ben' : 'Lauriane';
+
+      const phoneSub = document.getElementById('soutien-phone-sub');
+      if (phoneSub) {
+        phoneSub.innerText = `${partnerName} : ${partnerPhone || 'Non renseigné'}`;
+      }
+      const callPreview = document.getElementById('call-modal-phone-preview');
+      if (callPreview) {
+        callPreview.innerText = `Numéro : ${partnerPhone || 'Non renseigné'}`;
+      }
+    };
 
     window.loginUser = async () => {
       const email = document.getElementById('auth-email').value;
@@ -873,11 +897,7 @@
       const partnerName = isLauriane ? 'Ben' : 'Lauriane';
       document.getElementById('header-partner-name').innerText = partnerName;
 
-      // Mettre à jour la sous-description du numéro dans l'onglet Soutien
-      const phoneSub = document.getElementById('soutien-phone-sub');
-      if (phoneSub) {
-        phoneSub.innerText = `${partnerName} : ${p.phone || 'Non renseigné'}`;
-      }
+      window.updatePartnerPhoneUI();
 
       if (window.appState.sharedData.targetDate) {
         const dTarget = new Date(window.appState.sharedData.targetDate);
@@ -1059,15 +1079,13 @@
     };
 
     window.triggerDirectPhoneCall = () => {
-      const phone = window.appState.userProfile.phone;
-      if (phone) window.location.href = `tel:${phone}`;
-      else alert("Numéro non renseigné dans le profil !");
+      if (partnerPhone) window.location.href = `tel:${partnerPhone}`;
+      else alert("Numéro du partenaire non renseigné dans son profil !");
     };
 
     window.triggerWhatsAppCall = () => {
-      const phone = window.appState.userProfile.phone;
-      if (phone) window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}`, '_blank');
-      else alert("Numéro non renseigné dans le profil !");
+      if (partnerPhone) window.open(`https://wa.me/${partnerPhone.replace(/[^0-9]/g, '')}`, '_blank');
+      else alert("Numéro du partenaire non renseigné dans son profil !");
     };
 
     window.openTeleportModal = () => {
@@ -1078,14 +1096,18 @@
       const term = document.getElementById('teleport-terminal');
 
       if (isUsed) {
-        badge.innerText = "0/1 épuisé";
-        badge.className = "text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700";
+        if (badge) {
+          badge.innerText = "0/1 épuisé";
+          badge.className = "text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700";
+        }
         btn.disabled = true;
         btn.className = "w-full bg-slate-800 text-slate-500 text-xs font-bold py-2.5 rounded-xl cursor-not-allowed mb-2";
         term.innerHTML = "> CRÉDIT ÉPUISÉ POUR CETTE PÉRIODE.<br>> Attendez les prochaines retrouvailles pour réinitialiser le système.";
       } else {
-        badge.innerText = "1/1 disponible";
-        badge.className = "text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-800";
+        if (badge) {
+          badge.innerText = "1/1 disponible";
+          badge.className = "text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-800";
+        }
         btn.disabled = false;
         btn.className = "w-full bg-cyan-500 text-slate-900 text-xs font-bold py-2.5 rounded-xl shadow mb-2 hover:bg-cyan-400 transition";
         term.innerHTML = "> Système prêt.<br>> Consomme 1 jeton de téléportation.";
@@ -1109,9 +1131,6 @@
         
         window.appState.userProfile.teleportUsedForTarget = currentTarget;
         await setDoc(doc(db, "users", currentUser.uid), { teleportUsedForTarget: currentTarget }, { merge: true });
-
-        document.getElementById('teleport-credit-badge').innerText = "0/1 épuisé";
-        document.getElementById('teleport-credit-badge').className = "text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700";
       }, 3500);
     };
 
