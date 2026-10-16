@@ -612,12 +612,21 @@
       }
     };
 
+    // DEMANDER PERMISSION NOTIFICATION PWA
+    window.requestNotificationPermission = () => {
+      if ("Notification" in window && Notification.permission !== "granted") {
+        Notification.requestPermission();
+      }
+    };
+
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('app-container').classList.remove('hidden');
         document.getElementById('app-nav').classList.remove('hidden');
+
+        window.requestNotificationPermission();
 
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
@@ -626,7 +635,6 @@
           window.appState.userProfile = { name: user.email.split('@')[0], phone: "", teleportUsedForTarget: "", mood: "" };
         }
 
-        // Récupération des profils pour trouver le numéro du partenaire
         window.fetchPartnerProfile();
 
         onSnapshot(doc(db, "couples", COUPLE_ROOM_ID), (snapshot) => {
@@ -709,7 +717,7 @@
 
     window.logoutUser = () => signOut(auth);
 
-    // ENVOI PING AMOUR & EFFET
+    // ENVOI PING AMOUR & EFFET NOTIFICATION
     window.sendLovePing = async () => {
       const me = window.appState.userProfile.name || 'Moi';
       await setDoc(doc(db, "couples", COUPLE_ROOM_ID), {
@@ -722,6 +730,14 @@
     window.triggerLovePingEffect = (senderName) => {
       try { confetti({ particleCount: 80, spread: 80, origin: { y: 0.5 } }); } catch(e){}
       window.showToast(`${senderName} vient de vous envoyer un "Je pense à toi" ! 💖`);
+
+      // NOTIFICATION NATIVE PWA (ÉCRAN DE VERROUILLAGE)
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("Love Tracker Duo 💖", {
+          body: `${senderName} pense à toi en ce moment !`,
+          icon: "https://cdn-icons-png.flaticon.com/512/2589/2589175.png"
+        });
+      }
     };
 
     // LOGIQUE DE RESPIRATION ANTI-STRESS
