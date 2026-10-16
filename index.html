@@ -45,6 +45,26 @@
     }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Animation Bulle de Respiration */
+    .breath-circle {
+      transition: transform 4s ease-in-out, background-color 4s ease-in-out, box-shadow 4s ease-in-out;
+    }
+    .breath-circle.inhale {
+      transform: scale(1.4);
+      background-color: #3b82f6;
+      box-shadow: 0 0 35px rgba(59, 130, 246, 0.5);
+    }
+    .breath-circle.hold {
+      transform: scale(1.4);
+      background-color: #10b981;
+      box-shadow: 0 0 35px rgba(16, 185, 129, 0.5);
+    }
+    .breath-circle.exhale {
+      transform: scale(0.85);
+      background-color: #f43f5e;
+      box-shadow: 0 0 15px rgba(244, 63, 94, 0.3);
+    }
   </style>
 </head>
 <body class="h-full flex justify-center items-center bg-slate-900 text-slate-800 antialiased sm:py-6">
@@ -202,29 +222,67 @@
 
       <!-- TAB SOUTIEN -->
       <section id="tab-soutien" class="tab-content hidden p-5 space-y-5">
-        <h2 class="text-2xl font-extrabold text-slate-900">Mon soutien</h2>
-        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-100">
-          <button onclick="openMessageGeneratorModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 text-left">
-            <div class="flex items-center gap-3.5"><i class="fas fa-comment-dots text-brand-blue text-lg"></i><span class="font-semibold text-sm">Générer un message mignon</span></div>
-            <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
-          </button>
+        <div>
+          <h2 class="text-2xl font-extrabold text-slate-900">Je trouve du soutien</h2>
+        </div>
 
-          <button onclick="openCallPartnerModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 text-left">
-            <div class="flex items-center gap-3.5"><i class="fas fa-phone text-brand-blue text-lg"></i><span class="font-semibold text-sm">Lui téléphoner</span></div>
-            <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
-          </button>
-
-          <button onclick="openTeleportModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 text-left bg-gradient-to-r from-cyan-50/50 to-blue-50/50">
+        <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-100">
+          <button onclick="openMessageGeneratorModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition text-left">
             <div class="flex items-center gap-3.5">
-              <div class="w-10 h-10 rounded-full bg-slate-900 text-cyan-400 flex items-center justify-center text-base shadow-sm">
-                <i class="fas fa-satellite-dish"></i>
+              <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-base shadow-sm">
+                <i class="fas fa-comment-dots"></i>
+              </div>
+              <span class="font-bold text-sm text-slate-800">Lui envoyer un message</span>
+            </div>
+            <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
+          </button>
+
+          <button onclick="switchTab('tab-photos')" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition text-left">
+            <div class="flex items-center gap-3.5">
+              <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-base shadow-sm">
+                <i class="fas fa-image"></i>
+              </div>
+              <span class="font-bold text-sm text-slate-800">Regarder sa photo</span>
+            </div>
+            <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
+          </button>
+
+          <button onclick="openCallPartnerModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition text-left">
+            <div class="flex items-center gap-3.5">
+              <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-base shadow-sm">
+                <i class="fas fa-phone"></i>
               </div>
               <div>
-                <div class="flex items-center gap-2">
-                  <span class="font-bold text-sm text-slate-900">Téléportation Quantique</span>
-                  <span id="teleport-credit-badge" class="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-800">1/1 disponible</span>
-                </div>
-                <span class="text-[10px] text-slate-500">1 seul essai par période de manque !</span>
+                <span class="font-bold text-sm text-slate-800 block">Lui téléphoner</span>
+                <span id="soutien-phone-sub" class="text-[11px] text-slate-400 font-medium">Lauriane : 0612022421</span>
+              </div>
+            </div>
+            <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
+          </button>
+
+          <!-- RESPIRATION ANTI-STRESS -->
+          <button onclick="openBreathModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition text-left">
+            <div class="flex items-center gap-3.5">
+              <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center text-base shadow-sm">
+                <i class="fas fa-wind"></i>
+              </div>
+              <div>
+                <span class="font-bold text-sm text-slate-800 block">Respiration anti-stress</span>
+                <span class="text-[11px] text-slate-400 font-medium">Apaiser la sensation de manque</span>
+              </div>
+            </div>
+            <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
+          </button>
+
+          <!-- TÉLÉPORTATION QUANTIQUE -->
+          <button onclick="openTeleportModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition text-left">
+            <div class="flex items-center gap-3.5">
+              <div class="w-10 h-10 rounded-full bg-slate-900 text-cyan-400 flex items-center justify-center text-base shadow-sm">
+                <i class="fas fa-atom"></i>
+              </div>
+              <div>
+                <span class="font-bold text-sm text-slate-800 block">Mode extrême : se téléporter à elle</span>
+                <span class="text-[11px] text-slate-400 font-medium">(Nécessite la technologie expérimentale)</span>
               </div>
             </div>
             <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
@@ -383,6 +441,33 @@
       </div>
     </div>
 
+    <!-- MODAL RESPIRATION ANTI-STRESS -->
+    <div id="modal-breath" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-white w-full max-w-xs rounded-[32px] p-6 text-center shadow-2xl relative">
+        <button onclick="closeBreathModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition text-lg p-1">
+          <i class="fas fa-times"></i>
+        </button>
+
+        <h3 class="text-lg font-extrabold text-slate-900 flex items-center justify-center gap-1.5 mt-1">
+          Apaiser le cœur 🫁
+        </h3>
+        <p class="text-xs text-slate-500 mt-1.5 leading-relaxed px-2">
+          Suivez le rythme de la bulle pour relâcher la tension.
+        </p>
+
+        <!-- ZONE DE LA BULLE ANIMÉE -->
+        <div class="my-8 h-36 flex items-center justify-center relative">
+          <div id="breath-circle" class="breath-circle w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center shadow-inner border border-slate-200">
+            <span id="breath-instruction" class="text-xs font-bold text-slate-700 transition-opacity duration-500">Prêt ?</span>
+          </div>
+        </div>
+
+        <button id="breath-btn" onclick="toggleBreathExercise()" class="w-full bg-brand-blue text-white font-extrabold text-xs py-3.5 rounded-2xl shadow-lg hover:bg-brand-darkblue transition">
+          Lancer l'exercice (1 min)
+        </button>
+      </div>
+    </div>
+
     <!-- MODAL SOS URGENCE EXTRÊME -->
     <div id="modal-panic" class="fixed inset-0 bg-rose-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
       <div class="bg-white w-full max-w-xs rounded-3xl p-6 text-center shadow-2xl relative border-2 border-rose-500">
@@ -524,6 +609,8 @@
     const COUPLE_ROOM_ID = "COUPLE-2026";
     let currentUser = null;
     let selectedImageBase64 = null;
+    let breathInterval = null;
+    let breathIsRunning = false;
 
     window.appState = {
       userProfile: { name: "", phone: "", teleportUsedForTarget: "", mood: "" },
@@ -576,7 +663,7 @@
       } else {
         currentUser = null;
         document.getElementById('auth-screen').classList.remove('hidden');
-        document.getElementById('app-container').classList.add('hidden');
+        document.getElementById('app-container').classList.remove('hidden');
         document.getElementById('app-nav').classList.add('hidden');
       }
     });
@@ -611,6 +698,74 @@
     window.triggerLovePingEffect = (senderName) => {
       try { confetti({ particleCount: 80, spread: 80, origin: { y: 0.5 } }); } catch(e){}
       window.showToast(`${senderName} vient de vous envoyer un "Je pense à toi" ! 💖`);
+    };
+
+    // LOGIQUE DE RESPIRATION ANTI-STRESS
+    window.openBreathModal = () => {
+      document.getElementById('modal-breath').classList.remove('hidden');
+    };
+
+    window.closeBreathModal = () => {
+      window.stopBreathExercise();
+      document.getElementById('modal-breath').classList.add('hidden');
+    };
+
+    window.toggleBreathExercise = () => {
+      if (breathIsRunning) {
+        window.stopBreathExercise();
+      } else {
+        window.startBreathExercise();
+      }
+    };
+
+    window.startBreathExercise = () => {
+      breathIsRunning = true;
+      const btn = document.getElementById('breath-btn');
+      const circle = document.getElementById('breath-circle');
+      const text = document.getElementById('breath-instruction');
+      btn.innerText = "Arrêter l'exercice";
+      btn.className = "w-full bg-slate-800 text-white font-extrabold text-xs py-3.5 rounded-2xl shadow transition";
+
+      let step = 0;
+      const runStep = () => {
+        if (!breathIsRunning) return;
+        if (step === 0) {
+          circle.className = "breath-circle w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-xs inhale";
+          text.innerText = "Inspirez...";
+          text.className = "text-xs font-bold text-white";
+        } else if (step === 1) {
+          circle.className = "breath-circle w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-xs hold";
+          text.innerText = "Bloquez...";
+          text.className = "text-xs font-bold text-white";
+        } else if (step === 2) {
+          circle.className = "breath-circle w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-xs exhale";
+          text.innerText = "Exspirez...";
+          text.className = "text-xs font-bold text-white";
+        }
+        step = (step + 1) % 3;
+      };
+
+      runStep();
+      breathInterval = setInterval(runStep, 4000);
+    };
+
+    window.stopBreathExercise = () => {
+      breathIsRunning = false;
+      if (breathInterval) clearInterval(breathInterval);
+      const btn = document.getElementById('breath-btn');
+      const circle = document.getElementById('breath-circle');
+      const text = document.getElementById('breath-instruction');
+      if (btn) {
+        btn.innerText = "Lancer l'exercice (1 min)";
+        btn.className = "w-full bg-brand-blue text-white font-extrabold text-xs py-3.5 rounded-2xl shadow-lg hover:bg-brand-darkblue transition";
+      }
+      if (circle) {
+        circle.className = "breath-circle w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center shadow-inner border border-slate-200";
+      }
+      if (text) {
+        text.innerText = "Prêt ?";
+        text.className = "text-xs font-bold text-slate-700";
+      }
     };
 
     // HUMEUR DU JOUR
@@ -715,8 +870,14 @@
       document.getElementById('setting-my-phone').value = p.phone || '';
 
       const isLauriane = (p.name || '').toLowerCase().includes('lauriane');
-      const partnerName = isLauriane ? 'Benjamin' : 'Lauriane';
+      const partnerName = isLauriane ? 'Ben' : 'Lauriane';
       document.getElementById('header-partner-name').innerText = partnerName;
+
+      // Mettre à jour la sous-description du numéro dans l'onglet Soutien
+      const phoneSub = document.getElementById('soutien-phone-sub');
+      if (phoneSub) {
+        phoneSub.innerText = `${partnerName} : ${p.phone || 'Non renseigné'}`;
+      }
 
       if (window.appState.sharedData.targetDate) {
         const dTarget = new Date(window.appState.sharedData.targetDate);
@@ -735,7 +896,7 @@
       const s = window.appState.sharedData;
       const me = window.appState.userProfile.name || 'Moi';
       const isLauriane = me.toLowerCase().includes('lauriane');
-      const partnerName = isLauriane ? 'Benjamin' : 'Lauriane';
+      const partnerName = isLauriane ? 'Ben' : 'Lauriane';
 
       // Afficher l'humeur du partenaire
       if (s.moods) {
@@ -867,7 +1028,7 @@
 
     window.generateRandomSweetMessage = () => {
       const isLauriane = (window.appState.userProfile.name || '').toLowerCase().includes('lauriane');
-      const partnerName = isLauriane ? 'Benjamin' : 'Lauriane';
+      const partnerName = isLauriane ? 'Ben' : 'Lauriane';
 
       const msgs = [
         `Tu me manques un peu plus chaque seconde, vivement nos retrouvailles ${partnerName} ! 💕`,
@@ -892,7 +1053,7 @@
 
     window.openCallPartnerModal = () => {
       const isLauriane = (window.appState.userProfile.name || '').toLowerCase().includes('lauriane');
-      const partnerName = isLauriane ? 'Benjamin' : 'Lauriane';
+      const partnerName = isLauriane ? 'Ben' : 'Lauriane';
       document.getElementById('call-modal-partner-name').innerText = partnerName;
       document.getElementById('modal-call-partner').classList.remove('hidden');
     };
