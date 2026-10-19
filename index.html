@@ -532,7 +532,7 @@
         <input type="text" id="memory-subtitle-input" placeholder="Sous-titre..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs mb-4">
         <div class="flex gap-2">
           <button onclick="closeModal('modal-memory')" class="flex-1 bg-slate-100 text-xs py-2.5 rounded-xl font-bold">Annuler</button>
-          <button onclick="saveNewMemory()" class="flex-1 bg-brand-blue text-white text-xs font-bold py-2.5 rounded-xl">Publier</button>
+          <button onclick="saveNewMemory()" id="btn-publish-memory" class="flex-1 bg-brand-blue text-white text-xs font-bold py-2.5 rounded-xl">Publier</button>
         </div>
       </div>
     </div>
@@ -632,7 +632,6 @@
           if (snapshot.exists()) {
             const data = snapshot.data();
             
-            // Écouter le Ping Amour en direct
             if (data.lastLovePing && data.lastLovePing.sender !== (window.appState.userProfile.name || 'Moi')) {
               if (!window.lastPingTime || data.lastLovePing.time > window.lastPingTime) {
                 window.lastPingTime = data.lastLovePing.time;
@@ -708,9 +707,8 @@
 
     window.logoutUser = () => signOut(auth);
 
-    // ENVOI PING AMOUR & EFFET NOTIFICATION
+    // ENVOI PING AMOUR
     window.sendLovePing = async () => {
-      // Demander la permission iOS/Android au moment du clic
       if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
         await Notification.requestPermission();
       }
@@ -727,7 +725,6 @@
       try { confetti({ particleCount: 80, spread: 80, origin: { y: 0.5 } }); } catch(e){}
       window.showToast(`${senderName} vient de vous envoyer un "Je pense à toi" ! 💖`);
 
-      // NOTIFICATION NATIVE PWA (ÉCRAN DE VERROUILLAGE)
       if ("Notification" in window && Notification.permission === "granted") {
         new Notification("Love Tracker Duo 💖", {
           body: `${senderName} pense à toi en ce moment !`,
@@ -736,22 +733,100 @@
       }
     };
 
-    // LOGIQUE DE RESPIRATION ANTI-STRESS
-    window.openBreathModal = () => {
-      document.getElementById('modal-breath').classList.remove('hidden');
+    // COMPRESSION ET SAUVEGARDE AMÉLIORÉE DES PHOTOS SOUVENIRS
+    window.handleMemoryImageSelect = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 800; // Redimensionnement pour alléger la taille Firebase
+          let w = img.width, h = img.height;
+
+          if (w > h && w > maxDim) {
+            h = Math.round((h * maxDim) / w);
+            w = maxDim;
+          } else if (h > maxDim) {
+            w = Math.round((w * maxDim) / h);
+            h = maxDim;
+          }
+
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+
+          // Conversion en JPEG compressé à 60%
+          selectedImageBase64 = canvas.toDataURL('image/jpeg', 0.6);
+
+          const previewImg = document.getElementById('upload-preview-img');
+          previewImg.src = selectedImageBase64;
+          previewImg.classList.remove('hidden');
+          document.getElementById('upload-placeholder').classList.add('hidden');
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
     };
 
+    window.saveNewMemory = async () => {
+      const title = document.getElementById('memory-title-input').value.trim() || "Souvenir précieux";
+      const sub = document.getElementById('memory-subtitle-input').value.trim() || "";
+      
+      if (!selectedImageBase64) {
+        return alert("Veuillez d'abord sélectionner une photo !");
+      }
+
+      const btn = document.getElementById('btn-publish-memory');
+      btn.innerText = "Envoi...";
+      btn.disabled = true;
+
+      try {
+        if (!window.appState.sharedData.memories) window.appState.sharedData.memories = [];
+
+        window.appState.sharedData.memories.unshift({
+          id: Date.now(),
+          title,
+          sub,
+          img: selectedImageBase64,
+          author: window.appState.userProfile.name || 'Moi',
+          date: new Date().toLocaleDateString('fr-FR')
+        });
+
+        await setDoc(doc(db, "couples", COUPLE_ROOM_ID), { 
+          memories: window.appState.sharedData.memories 
+        }, { merge: true });
+
+        selectedImageBase64 = null;
+        document.getElementById('upload-preview-img').classList.add('hidden');
+        document.getElementById('upload-placeholder').classList.remove('hidden');
+        document.getElementById('memory-title-input').value = '';
+        document.getElementById('memory-subtitle-input').value = '';
+
+        window.closeModal('modal-memory');
+        window.showToast("Photo publiée dans l'album ! 📸");
+      } catch (err) {
+        alert("Erreur lors de l'enregistrement de l'image. Essayez une image plus petite.");
+        console.error(err);
+      } finally {
+        btn.innerText = "Publier";
+        btn.disabled = false;
+      }
+    };
+
+    // RESPIRATION ANTI-STRESS
+    window.openBreathModal = () => document.getElementById('modal-breath').classList.remove('hidden');
     window.closeBreathModal = () => {
       window.stopBreathExercise();
       document.getElementById('modal-breath').classList.add('hidden');
     };
 
     window.toggleBreathExercise = () => {
-      if (breathIsRunning) {
-        window.stopBreathExercise();
-      } else {
-        window.startBreathExercise();
-      }
+      if (breathIsRunning) window.stopBreathExercise();
+      else window.startBreathExercise();
     };
 
     window.startBreathExercise = () => {
@@ -795,9 +870,7 @@
         btn.innerText = "Lancer l'exercice (1 min)";
         btn.className = "w-full bg-brand-blue text-white font-extrabold text-xs py-3.5 rounded-2xl shadow-lg hover:bg-brand-darkblue transition";
       }
-      if (circle) {
-        circle.className = "breath-circle w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center shadow-inner border border-slate-200";
-      }
+      if (circle) circle.className = "breath-circle w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center shadow-inner border border-slate-200";
       if (text) {
         text.innerText = "Prêt ?";
         text.className = "text-xs font-bold text-slate-700";
@@ -862,25 +935,6 @@
       window.showToast("Pensée partagée !");
     };
 
-    window.saveNewMemory = async () => {
-      const title = document.getElementById('memory-title-input').value.trim() || "Souvenir précieux";
-      const sub = document.getElementById('memory-subtitle-input').value.trim() || "";
-      if (!selectedImageBase64) return alert("Sélectionnez d'abord une photo !");
-
-      if (!window.appState.sharedData.memories) window.appState.sharedData.memories = [];
-      window.appState.sharedData.memories.unshift({
-        id: Date.now(), title, sub, img: selectedImageBase64,
-        author: window.appState.userProfile.name || 'Moi', date: new Date().toLocaleDateString('fr-FR')
-      });
-
-      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), { memories: window.appState.sharedData.memories }, { merge: true });
-      selectedImageBase64 = null;
-      document.getElementById('upload-preview-img').classList.add('hidden');
-      document.getElementById('upload-placeholder').classList.remove('hidden');
-      window.closeModal('modal-memory');
-      window.showToast("Photo ajoutée !");
-    };
-
     window.deleteMemory = async (id) => {
       if (!confirm("Voulez-vous vraiment supprimer cette photo ?")) return;
       window.appState.sharedData.memories = window.appState.sharedData.memories.filter(m => m.id !== id);
@@ -930,7 +984,6 @@
       const isLauriane = me.toLowerCase().includes('lauriane');
       const partnerName = isLauriane ? 'Ben' : 'Lauriane';
 
-      // Afficher l'humeur du partenaire
       if (s.moods) {
         const partnerMood = Object.keys(s.moods).find(k => k.toLowerCase() !== me.toLowerCase());
         const partnerMoodEl = document.getElementById('partner-mood-display');
@@ -1170,32 +1223,6 @@
       document.getElementById('modal-photo-viewer').classList.remove('hidden');
     };
 
-    window.handleMemoryImageSelect = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const maxDim = 800;
-          let w = img.width, h = img.height;
-          if (w > h && w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
-          else if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
-          canvas.width = w; canvas.height = h;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, w, h);
-          selectedImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
-          
-          document.getElementById('upload-preview-img').src = selectedImageBase64;
-          document.getElementById('upload-preview-img').classList.remove('hidden');
-          document.getElementById('upload-placeholder').classList.add('hidden');
-        };
-        img.src = evt.target.result;
-      };
-      reader.readAsDataURL(file);
-    };
-
     window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
     window.openThoughtModal = () => document.getElementById('modal-thought').classList.remove('hidden');
     window.openAddMemoryModal = () => document.getElementById('modal-memory').classList.remove('hidden');
@@ -1218,7 +1245,6 @@
 
     setInterval(window.updateCountdown, 1000);
 
-    // ENREGISTREMENT SERVICE WORKER PWA
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Load err:', err));
