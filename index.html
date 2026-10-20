@@ -178,12 +178,10 @@
 
         <!-- WIDGET MOOD TRACKER & PING AMOUR -->
         <div class="px-5 mt-4 space-y-3">
-          <!-- Ping direct -->
           <button onclick="sendLovePing()" class="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white font-extrabold text-xs py-3 rounded-2xl shadow-md hover:from-rose-600 hover:to-pink-600 transition flex items-center justify-center gap-2">
             <i class="fas fa-paper-plane text-sm"></i> Envoyer un "Je pense à toi" en direct 💭
           </button>
 
-          <!-- Humeur du jour -->
           <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
             <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-2">Mon humeur aujourd'hui :</span>
             <div class="grid grid-cols-4 gap-2">
@@ -209,7 +207,6 @@
             <span class="text-xs font-bold text-slate-800">Écrire une pensée</span>
           </div>
 
-          <!-- SOS MANQUE -->
           <div onclick="triggerPanicEmergency()" class="panic-button text-white p-4 rounded-2xl shadow-lg flex flex-col items-center text-center cursor-pointer transition transform hover:scale-105 border-2 border-white/40">
             <div class="w-12 h-12 rounded-full bg-white/20 text-white flex items-center justify-center text-xl mb-2 shadow-inner">
               <i class="fas fa-heart-crack text-white animate-pulse"></i>
@@ -250,7 +247,6 @@
             <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
           </button>
 
-          <!-- RESPIRATION ANTI-STRESS -->
           <button onclick="openBreathModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition text-left">
             <div class="flex items-center gap-3.5">
               <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center text-base shadow-sm">
@@ -264,7 +260,6 @@
             <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
           </button>
 
-          <!-- TÉLÉPORTATION -->
           <button onclick="openTeleportModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition text-left">
             <div class="flex items-center gap-3.5">
               <div class="w-10 h-10 rounded-full bg-slate-900 text-cyan-400 flex items-center justify-center text-base shadow-sm">
@@ -445,7 +440,6 @@
           Suivez le rythme de la bulle pour relâcher la tension.
         </p>
 
-        <!-- ZONE DE LA BULLE ANIMÉE -->
         <div class="my-8 h-36 flex items-center justify-center relative">
           <div id="breath-circle" class="breath-circle w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center shadow-inner border border-slate-200">
             <span id="breath-instruction" class="text-xs font-bold text-slate-700 transition-opacity duration-500">Prêt ?</span>
@@ -592,6 +586,8 @@
       appId: "1:784351605587:web:8655e0beea44eb9be7edb4"
     };
 
+    const VAPID_KEY = "BApDpyXcuKSTJXs7-ZkDxKehz0fwyb01kQfLCn2WywaZyGxtqEtb3rNCrgYLPTJoTqlWcXqAuV96Ex82gDiPVsw";
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
@@ -707,10 +703,14 @@
 
     window.logoutUser = () => signOut(auth);
 
-    // ENVOI PING AMOUR
+    // ENVOI PING AMOUR & NOTIFICATION PUSH
     window.sendLovePing = async () => {
       if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
         await Notification.requestPermission();
+      }
+
+      if (window.enablePushNotifications) {
+        await window.enablePushNotifications();
       }
 
       const me = window.appState.userProfile.name || 'Moi';
@@ -733,7 +733,7 @@
       }
     };
 
-    // COMPRESSION ET SAUVEGARDE AMÉLIORÉE DES PHOTOS SOUVENIRS
+    // COMPRESSION ET SAUVEGARDE PHOTOS SOUVENIRS
     window.handleMemoryImageSelect = (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -743,7 +743,7 @@
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const maxDim = 800; // Redimensionnement pour alléger la taille Firebase
+          const maxDim = 800;
           let w = img.width, h = img.height;
 
           if (w > h && w > maxDim) {
@@ -759,7 +759,6 @@
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, w, h);
 
-          // Conversion en JPEG compressé à 60%
           selectedImageBase64 = canvas.toDataURL('image/jpeg', 0.6);
 
           const previewImg = document.getElementById('upload-preview-img');
@@ -1245,9 +1244,41 @@
 
     setInterval(window.updateCountdown, 1000);
 
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Load err:', err));
+    // ENREGISTREMENT SERVICE WORKER & WEBPUSH FIREBASE
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      window.addEventListener('load', async () => {
+        try {
+          const registration = await navigator.serviceWorker.register('sw.js');
+          
+          import("https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js").then(async ({ getMessaging, getToken, onMessage }) => {
+            const messaging = getMessaging(app);
+
+            window.enablePushNotifications = async () => {
+              try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                  const currentToken = await getToken(messaging, {
+                    serviceWorkerRegistration: registration,
+                    vapidKey: VAPID_KEY
+                  });
+
+                  if (currentToken && currentUser) {
+                    await setDoc(doc(db, "users", currentUser.uid), { fcmToken: currentToken }, { merge: true });
+                  }
+                }
+              } catch (err) {
+                console.error("Erreur Push:", err);
+              }
+            };
+
+            onMessage(messaging, (payload) => {
+              window.triggerLovePingEffect(payload.notification ? payload.notification.title : "Pensée reçue !");
+            });
+          });
+
+        } catch (err) {
+          console.log('SW Load err:', err);
+        }
       });
     }
   </script>
