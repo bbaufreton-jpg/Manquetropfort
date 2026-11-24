@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full bg-slate-100">
+<html lang="fr" class="h-full bg-slate-900">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Gestion du Manque - Love Tracker Duo</title>
   
   <!-- PWA Metadata & Mobile App Tags -->
@@ -11,6 +11,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Love Duo">
   <meta name="theme-color" content="#0d41e1">
+  <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2589/2589175.png">
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -23,11 +24,27 @@
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
+      overscroll-behavior-y: none;
+    }
+    input, textarea {
+      user-select: text;
     }
     .bg-brand-blue { background-color: #0d41e1; }
     .bg-brand-darkblue { background-color: #072ac8; }
     .text-brand-blue { color: #0d41e1; }
     .border-brand-blue { border-color: #0d41e1; }
+
+    /* Gestion encoche iPhone (Safe Area) */
+    .safe-top {
+      padding-top: max(1.5rem, calc(env(safe-area-inset-top) + 0.75rem));
+    }
+    .safe-bottom-nav {
+      padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    }
+    .safe-toast {
+      top: max(1rem, calc(env(safe-area-inset-top) + 0.5rem));
+    }
+
     .glass-card {
       background: rgba(255, 255, 255, 0.16);
       backdrop-filter: blur(14px);
@@ -41,10 +58,18 @@
     }
     @keyframes pulse-gentle {
       0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
+      50% { transform: scale(1.03); }
     }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Retour tactile natif mobile */
+    .tap-bounce {
+      transition: transform 0.12s ease, background-color 0.15s ease;
+    }
+    .tap-bounce:active {
+      transform: scale(0.96);
+    }
 
     /* Animation Bulle de Respiration */
     .breath-circle {
@@ -67,14 +92,14 @@
     }
   </style>
 </head>
-<body class="h-full flex justify-center items-center bg-slate-900 text-slate-800 antialiased sm:py-6">
+<body class="h-[100dvh] flex justify-center items-center bg-slate-900 text-slate-800 antialiased sm:py-6 overflow-hidden">
 
   <div class="w-full max-w-md h-full sm:h-[844px] bg-slate-50 sm:rounded-[40px] shadow-2xl flex flex-col overflow-hidden relative border-0 sm:border-[8px] sm:border-slate-800">
     
     <!-- Toast de notification -->
-    <div id="toast-banner" class="fixed top-4 left-1/2 -translate-x-1/2 max-w-xs w-full bg-slate-900/95 text-white text-xs font-semibold px-4 py-3 rounded-2xl shadow-xl z-[100] transform -translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2.5">
-      <i id="toast-icon" class="fas fa-check-circle text-emerald-400 text-base"></i>
-      <span id="toast-message">Modifications enregistrées !</span>
+    <div id="toast-banner" class="fixed safe-toast left-1/2 -translate-x-1/2 max-w-[90%] sm:max-w-xs w-full bg-slate-900/95 text-white text-xs font-semibold px-4 py-3 rounded-2xl shadow-xl z-[100] transform -translate-y-28 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2.5">
+      <i id="toast-icon" class="fas fa-check-circle text-emerald-400 text-base shrink-0"></i>
+      <span id="toast-message" class="leading-snug">Modifications enregistrées !</span>
     </div>
 
     <!-- ÉCRAN DE CONNEXION -->
@@ -88,35 +113,35 @@
       <div class="w-full space-y-3">
         <div>
           <label class="text-[11px] font-bold text-slate-600 block mb-1">E-mail</label>
-          <input type="email" id="auth-email" placeholder="votre@email.com" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-brand-blue font-semibold">
+          <input type="email" id="auth-email" placeholder="votre@email.com" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-base sm:text-xs focus:outline-none focus:border-brand-blue font-semibold">
         </div>
         <div>
           <label class="text-[11px] font-bold text-slate-600 block mb-1">Mot de passe</label>
-          <input type="password" id="auth-password" placeholder="••••••••" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-brand-blue font-semibold">
+          <input type="password" id="auth-password" placeholder="••••••••" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-base sm:text-xs focus:outline-none focus:border-brand-blue font-semibold">
         </div>
 
-        <button onclick="loginUser()" class="w-full bg-brand-blue text-white font-bold text-xs py-3 rounded-xl shadow hover:bg-brand-darkblue transition">
+        <button onclick="loginUser()" class="tap-bounce w-full bg-brand-blue text-white font-bold text-sm sm:text-xs py-3.5 rounded-xl shadow hover:bg-brand-darkblue transition">
           Se connecter
         </button>
-        <button onclick="registerUser()" class="w-full bg-emerald-500 text-white font-bold text-xs py-3 rounded-xl shadow hover:bg-emerald-600 transition">
+        <button onclick="registerUser()" class="tap-bounce w-full bg-emerald-500 text-white font-bold text-sm sm:text-xs py-3.5 rounded-xl shadow hover:bg-emerald-600 transition">
           Créer un compte
         </button>
       </div>
     </div>
 
     <!-- MAIN APP CONTAINER -->
-    <main id="app-container" class="flex-1 overflow-y-auto hide-scrollbar pb-24 relative hidden">
+    <main id="app-container" class="flex-1 overflow-y-auto hide-scrollbar pb-28 relative hidden">
       
       <!-- TAB ACCUEIL -->
       <section id="tab-accueil" class="tab-content transition-opacity duration-300">
-        <div class="bg-brand-blue text-white pt-6 pb-14 px-6 rounded-b-[36px] relative shadow-md">
+        <div class="bg-brand-blue text-white safe-top pb-14 px-5 rounded-b-[36px] relative shadow-md">
           <div class="flex justify-between items-center mb-3">
             <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md pl-1.5 pr-3 py-1 rounded-full text-[11px] font-bold text-white border border-white/20">
               <span id="user-avatar-badge" class="w-5 h-5 rounded-full bg-white text-brand-blue flex items-center justify-center text-xs shadow-sm">👤</span>
-              <span class="truncate max-w-[120px]" id="my-name-pill">Compte</span>
+              <span class="truncate max-w-[130px]" id="my-name-pill">Compte</span>
             </div>
 
-            <button onclick="logoutUser()" class="bg-black/20 hover:bg-black/30 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-semibold text-white transition border border-white/10">
+            <button onclick="logoutUser()" class="tap-bounce bg-black/20 hover:bg-black/30 backdrop-blur-md px-3 py-1.5 rounded-full text-[11px] font-semibold text-white transition border border-white/10">
               <i class="fas fa-power-off text-[10px] mr-1"></i> Déconnexion
             </button>
           </div>
@@ -126,34 +151,35 @@
               <span>Espace connecté & sécurisé</span>
               <i class="fas fa-lock text-rose-300 text-[9px]"></i>
             </span>
-            <h1 class="text-3xl font-extrabold tracking-tight mt-0.5" id="main-partner-title">
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight mt-0.5" id="main-partner-title">
               Le manque de <span id="header-partner-name">l'autre</span>
             </h1>
           </div>
 
-          <div class="glass-card rounded-3xl p-5 text-center shadow-lg relative overflow-hidden">
-            <div class="flex justify-center items-center gap-1.5 text-amber-300 text-xs sm:text-sm font-semibold mb-2">
+          <div class="glass-card rounded-3xl p-4 sm:p-5 text-center shadow-lg relative overflow-hidden">
+            <div class="flex justify-center items-center gap-1.5 text-amber-300 text-xs font-semibold mb-2">
               <i class="fas fa-sparkles"></i>
-              <span>Compte à rebours des retrouvailles :</span>
+              <span id="countdown-subtitle">Compte à rebours des retrouvailles :</span>
               <i class="fas fa-sparkles"></i>
             </div>
 
-            <div class="my-3 flex justify-center items-baseline gap-2 sm:gap-3">
-              <div class="flex flex-col"><span class="text-3xl sm:text-4xl font-extrabold" id="cd-days">00</span><span class="text-[10px] uppercase text-blue-200 font-semibold">Jours</span></div>
+            <div class="my-2.5 flex justify-center items-baseline gap-2 sm:gap-3">
+              <div class="flex flex-col min-w-[44px]"><span class="text-3xl sm:text-4xl font-extrabold tabular-nums" id="cd-days">00</span><span class="text-[10px] uppercase text-blue-200 font-semibold">Jours</span></div>
               <span class="text-2xl sm:text-3xl font-light text-blue-300">:</span>
-              <div class="flex flex-col"><span class="text-3xl sm:text-4xl font-extrabold" id="cd-hours">00</span><span class="text-[10px] uppercase text-blue-200 font-semibold">Heures</span></div>
+              <div class="flex flex-col min-w-[44px]"><span class="text-3xl sm:text-4xl font-extrabold tabular-nums" id="cd-hours">00</span><span class="text-[10px] uppercase text-blue-200 font-semibold">Heures</span></div>
               <span class="text-2xl sm:text-3xl font-light text-blue-300">:</span>
-              <div class="flex flex-col"><span class="text-3xl sm:text-4xl font-extrabold" id="cd-mins">00</span><span class="text-[10px] uppercase text-blue-200 font-semibold">Mins</span></div>
+              <div class="flex flex-col min-w-[44px]"><span class="text-3xl sm:text-4xl font-extrabold tabular-nums" id="cd-mins">00</span><span class="text-[10px] uppercase text-blue-200 font-semibold">Mins</span></div>
               <span class="text-2xl sm:text-3xl font-light text-blue-300">:</span>
-              <div class="flex flex-col"><span class="text-3xl sm:text-4xl font-extrabold" id="cd-secs">00</span><span class="text-[10px] uppercase text-blue-200 font-semibold">Secs</span></div>
+              <div class="flex flex-col min-w-[44px]"><span class="text-3xl sm:text-4xl font-extrabold tabular-nums" id="cd-secs">00</span><span class="text-[10px] uppercase text-blue-200 font-semibold">Secs</span></div>
             </div>
 
-            <p class="text-blue-100 font-medium text-sm mt-1" id="sleeps-summary">Plus que 0 dodos ! 🌙</p>
+            <p class="text-blue-100 font-semibold text-xs sm:text-sm mt-1" id="sleeps-summary">Plus que 0 dodo ! 🌙</p>
           </div>
         </div>
 
+        <!-- Cartes rapides -->
         <div class="px-5 -mt-8 grid grid-cols-2 gap-3 relative z-10">
-          <div onclick="switchTab('tab-calendrier')" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition cursor-pointer">
+          <div onclick="switchTab('tab-calendrier')" class="tap-bounce bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between cursor-pointer">
             <div class="flex justify-between items-start">
               <div class="w-10 h-10 rounded-xl bg-blue-50 text-brand-blue flex items-center justify-center text-lg"><i class="fas fa-bed"></i></div>
               <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
@@ -164,7 +190,7 @@
             </div>
           </div>
 
-          <div onclick="openReunionProjectsModal()" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition cursor-pointer group">
+          <div onclick="openReunionProjectsModal()" class="tap-bounce bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between cursor-pointer group">
             <div class="flex justify-between items-start">
               <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg"><i class="fas fa-champagne-glasses"></i></div>
               <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
@@ -178,36 +204,46 @@
 
         <!-- WIDGET MOOD TRACKER & PING AMOUR -->
         <div class="px-5 mt-4 space-y-3">
-          <button onclick="sendLovePing()" class="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white font-extrabold text-xs py-3 rounded-2xl shadow-md hover:from-rose-600 hover:to-pink-600 transition flex items-center justify-center gap-2">
-            <i class="fas fa-paper-plane text-sm"></i> Envoyer un "Je pense à toi" en direct 💭
+          <button onclick="sendLovePing()" id="btn-love-ping" class="tap-bounce w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white font-extrabold text-xs py-3.5 px-4 rounded-2xl shadow-md hover:from-rose-600 hover:to-pink-600 transition flex items-center justify-center gap-2">
+            <i class="fas fa-paper-plane text-sm"></i> Envoyer un « Je pense à toi » 💭
           </button>
 
           <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
             <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-2">Mon humeur aujourd'hui :</span>
             <div class="grid grid-cols-4 gap-2">
-              <button onclick="setMood('🥰 Câlin(e)')" class="mood-btn p-2 rounded-xl bg-slate-50 border border-slate-200 text-xl hover:bg-rose-50 transition">🥰</button>
-              <button onclick="setMood('🥺 Manque fort')" class="mood-btn p-2 rounded-xl bg-slate-50 border border-slate-200 text-xl hover:bg-rose-50 transition">🥺</button>
-              <button onclick="setMood('😴 Fatigué(e)')" class="mood-btn p-2 rounded-xl bg-slate-50 border border-slate-200 text-xl hover:bg-rose-50 transition">😴</button>
-              <button onclick="setMood('🥳 En forme')" class="mood-btn p-2 rounded-xl bg-slate-50 border border-slate-200 text-xl hover:bg-rose-50 transition">🥳</button>
+              <button onclick="setMood('🥰 Câlin(e)')" class="tap-bounce mood-btn p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xl active:bg-rose-100 transition">🥰</button>
+              <button onclick="setMood('🥺 Manque fort')" class="tap-bounce mood-btn p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xl active:bg-rose-100 transition">🥺</button>
+              <button onclick="setMood('😴 Fatigué(e)')" class="tap-bounce mood-btn p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xl active:bg-rose-100 transition">😴</button>
+              <button onclick="setMood('🥳 En forme')" class="tap-bounce mood-btn p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xl active:bg-rose-100 transition">🥳</button>
             </div>
-            <p id="partner-mood-display" class="text-xs font-medium text-slate-600 mt-3 pt-2 border-t border-slate-100 flex items-center gap-2">
+            <p id="partner-mood-display" class="text-xs font-medium text-slate-600 mt-3 pt-2.5 border-t border-slate-100 flex items-center gap-2">
               <i class="fas fa-smile text-brand-blue"></i> <span>Humeur de l'autre : Non renseignée</span>
             </p>
           </div>
         </div>
 
-        <div class="px-5 mt-5 flex justify-between items-center">
+        <!-- SECTION PENSÉES SUR ACCUEIL -->
+        <div class="px-5 mt-5 flex justify-between items-center gap-2">
           <h3 class="font-bold text-base text-slate-900">Pensées partagées</h3>
-          <button onclick="switchTab('tab-photos')" class="text-xs font-bold text-brand-blue hover:underline">Tout voir</button>
+          <div class="flex items-center gap-2">
+            <!-- Apparaît uniquement quand le décompte est terminé -->
+            <button id="btn-clear-thoughts-home" onclick="clearAllThoughts()" class="hidden tap-bounce bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+              <i class="fas fa-broom text-[10px]"></i> Vider
+            </button>
+            <button onclick="switchTab('tab-photos')" class="text-xs font-bold text-brand-blue hover:underline">Tout voir</button>
+          </div>
         </div>
 
-        <div class="px-5 mt-2.5 grid grid-cols-2 gap-3">
-          <div onclick="openThoughtModal()" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center cursor-pointer hover:bg-slate-50 transition">
+        <!-- Aperçu des 2 dernières pensées -->
+        <div id="home-thoughts-preview" class="px-5 mt-2 space-y-2 empty:hidden"></div>
+
+        <div class="px-5 mt-3 grid grid-cols-2 gap-3">
+          <div onclick="openThoughtModal()" class="tap-bounce bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center cursor-pointer">
             <div class="w-12 h-12 rounded-full bg-sky-50 text-brand-blue flex items-center justify-center text-xl mb-2"><i class="far fa-comment-dots"></i></div>
             <span class="text-xs font-bold text-slate-800">Écrire une pensée</span>
           </div>
 
-          <div onclick="triggerPanicEmergency()" class="panic-button text-white p-4 rounded-2xl shadow-lg flex flex-col items-center text-center cursor-pointer transition transform hover:scale-105 border-2 border-white/40">
+          <div onclick="triggerPanicEmergency()" class="tap-bounce panic-button text-white p-4 rounded-2xl shadow-lg flex flex-col items-center justify-center text-center cursor-pointer border-2 border-white/40">
             <div class="w-12 h-12 rounded-full bg-white/20 text-white flex items-center justify-center text-xl mb-2 shadow-inner">
               <i class="fas fa-heart-crack text-white animate-pulse"></i>
             </div>
@@ -218,25 +254,29 @@
       </section>
 
       <!-- TAB SOUTIEN -->
-      <section id="tab-soutien" class="tab-content hidden p-5 space-y-5">
+      <section id="tab-soutien" class="tab-content hidden px-5 safe-top space-y-5">
         <div>
           <h2 class="text-2xl font-extrabold text-slate-900">Je trouve du soutien</h2>
+          <p class="text-xs text-slate-500">Outils rapides quand le manque se fait sentir</p>
         </div>
 
         <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-100">
-          <button onclick="openMessageGeneratorModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition text-left">
+          <button onclick="openMessageGeneratorModal()" class="w-full p-4 flex items-center justify-between active:bg-slate-50 transition text-left">
             <div class="flex items-center gap-3.5">
-              <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-base shadow-sm">
+              <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-base shadow-sm shrink-0">
                 <i class="fas fa-comment-dots"></i>
               </div>
-              <span class="font-bold text-sm text-slate-800">Lui envoyer un message</span>
+              <div>
+                <span class="font-bold text-sm text-slate-800 block">Lui envoyer un message</span>
+                <span class="text-[11px] text-slate-400 font-medium">Idées de mots doux à copier</span>
+              </div>
             </div>
             <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
           </button>
 
-          <button onclick="openCallPartnerModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition text-left">
+          <button onclick="openCallPartnerModal()" class="w-full p-4 flex items-center justify-between active:bg-slate-50 transition text-left">
             <div class="flex items-center gap-3.5">
-              <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-base shadow-sm">
+              <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-base shadow-sm shrink-0">
                 <i class="fas fa-phone"></i>
               </div>
               <div>
@@ -247,9 +287,9 @@
             <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
           </button>
 
-          <button onclick="openBreathModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition text-left">
+          <button onclick="openBreathModal()" class="w-full p-4 flex items-center justify-between active:bg-slate-50 transition text-left">
             <div class="flex items-center gap-3.5">
-              <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center text-base shadow-sm">
+              <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center text-base shadow-sm shrink-0">
                 <i class="fas fa-wind"></i>
               </div>
               <div>
@@ -260,9 +300,9 @@
             <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
           </button>
 
-          <button onclick="openTeleportModal()" class="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition text-left">
+          <button onclick="openTeleportModal()" class="w-full p-4 flex items-center justify-between active:bg-slate-50 transition text-left">
             <div class="flex items-center gap-3.5">
-              <div class="w-10 h-10 rounded-full bg-slate-900 text-cyan-400 flex items-center justify-center text-base shadow-sm">
+              <div class="w-10 h-10 rounded-full bg-slate-900 text-cyan-400 flex items-center justify-center text-base shadow-sm shrink-0">
                 <i class="fas fa-atom"></i>
               </div>
               <div>
@@ -276,28 +316,40 @@
       </section>
 
       <!-- TAB PHOTOS / SOUVENIRS -->
-      <section id="tab-photos" class="tab-content hidden p-5 space-y-4">
-        <div class="flex justify-between items-center pt-2">
+      <section id="tab-photos" class="tab-content hidden px-5 safe-top space-y-4">
+        <div class="flex justify-between items-center">
           <div>
             <h2 class="text-2xl font-extrabold text-slate-900">Album Souvenirs</h2>
-            <p class="text-xs text-slate-500">Galerie photos synchronisée en direct</p>
+            <p class="text-xs text-slate-500">Vos photos restent d'une absence à l'autre</p>
           </div>
-          <button onclick="openAddMemoryModal()" class="bg-brand-blue text-white text-xs px-3.5 py-2.5 rounded-xl font-bold shadow hover:bg-brand-darkblue transition flex items-center gap-1.5">
+          <button onclick="openAddMemoryModal()" class="tap-bounce bg-brand-blue text-white text-xs px-3.5 py-2.5 rounded-xl font-bold shadow hover:bg-brand-darkblue transition flex items-center gap-1.5 shrink-0">
             <i class="fas fa-camera"></i> + Photo
           </button>
         </div>
 
         <div class="grid grid-cols-2 gap-3" id="gallery-grid"></div>
 
-        <div class="pt-4 border-t border-slate-200">
-          <h3 class="text-sm font-bold text-slate-800 mb-2">Journal de nos pensées</h3>
+        <!-- JOURNAL DES PENSÉES -->
+        <div class="pt-4 border-t border-slate-200 space-y-3">
+          <div class="flex justify-between items-center gap-2">
+            <div>
+              <h3 class="text-sm font-bold text-slate-800">Journal de nos pensées</h3>
+              <p class="text-[11px] text-slate-400">Pensées de la période en cours</p>
+            </div>
+
+            <!-- Bouton visible UNIQUEMENT quand le décompte est terminé -->
+            <button id="btn-clear-thoughts-souvenirs" onclick="clearAllThoughts()" class="hidden tap-bounce bg-rose-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-sm hover:bg-rose-600 transition flex items-center gap-1.5 shrink-0">
+              <i class="fas fa-broom text-xs"></i> Vider les pensées
+            </button>
+          </div>
+
           <div class="space-y-2.5" id="thoughts-list"></div>
         </div>
       </section>
 
       <!-- TAB CALENDRIER -->
-      <section id="tab-calendrier" class="tab-content hidden p-5 space-y-5">
-        <div class="pt-2">
+      <section id="tab-calendrier" class="tab-content hidden px-5 safe-top space-y-5">
+        <div>
           <h2 class="text-2xl font-extrabold text-slate-900">Suivi des Retrouvailles</h2>
           <p class="text-xs text-slate-500">Visualisez votre progression jusqu'au Jour J</p>
         </div>
@@ -329,12 +381,13 @@
       </section>
 
       <!-- TAB PROFIL -->
-      <section id="tab-profil" class="tab-content hidden p-5 space-y-5">
-        <div class="pt-2">
+      <section id="tab-profil" class="tab-content hidden px-5 safe-top space-y-5">
+        <div>
           <h2 class="text-2xl font-extrabold text-slate-900">Mon Compte</h2>
-          <p class="text-xs text-slate-500">Gérez vos infos et la date du couple</p>
+          <p class="text-xs text-slate-500">Gérez vos infos, dates et notifications</p>
         </div>
 
+        <!-- Infos perso -->
         <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-4">
           <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
             <div class="w-8 h-8 rounded-xl bg-blue-50 text-brand-blue flex items-center justify-center text-sm font-bold">👤</div>
@@ -343,19 +396,20 @@
 
           <div>
             <label class="text-[11px] font-bold text-slate-600 block mb-1">Mon Prénom</label>
-            <input type="text" id="setting-my-name" placeholder="Votre prénom" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-brand-blue">
+            <input type="text" id="setting-my-name" placeholder="Votre prénom (ex: Ben ou Lauriane)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-base sm:text-xs font-semibold focus:outline-none focus:border-brand-blue">
           </div>
 
           <div>
             <label class="text-[11px] font-bold text-slate-600 block mb-1">Mon Numéro de Téléphone</label>
-            <input type="tel" id="setting-my-phone" placeholder="06 00 00 00 00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-brand-blue">
+            <input type="tel" id="setting-my-phone" placeholder="06 00 00 00 00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-base sm:text-xs font-semibold focus:outline-none focus:border-brand-blue">
           </div>
 
-          <button onclick="saveMyPersonalProfile()" class="w-full bg-brand-blue text-white font-bold text-xs py-3 rounded-xl shadow hover:bg-brand-darkblue transition flex items-center justify-center gap-2">
+          <button onclick="saveMyPersonalProfile()" class="tap-bounce w-full bg-brand-blue text-white font-bold text-xs py-3.5 rounded-xl shadow hover:bg-brand-darkblue transition flex items-center justify-center gap-2">
             <i class="fas fa-check"></i> Enregistrer mon profil
           </button>
         </div>
 
+        <!-- Dates partagées -->
         <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-4">
           <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
             <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm font-bold">🗓️</div>
@@ -364,64 +418,94 @@
 
           <div>
             <label class="text-[11px] font-bold text-slate-600 block mb-1">Début de la séparation</label>
-            <input type="datetime-local" id="setting-start-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-brand-blue">
+            <input type="datetime-local" id="setting-start-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base sm:text-xs font-semibold focus:outline-none focus:border-brand-blue">
           </div>
 
           <div>
             <label class="text-[11px] font-bold text-slate-600 block mb-1">Date & Heure des Retrouvailles ✨</label>
-            <input type="datetime-local" id="setting-target-date" class="w-full bg-slate-50 border-2 border-brand-blue/30 rounded-xl px-3 py-2.5 text-xs font-bold text-brand-blue focus:outline-none focus:border-brand-blue">
+            <input type="datetime-local" id="setting-target-date" class="w-full bg-slate-50 border-2 border-brand-blue/30 rounded-xl px-3 py-2.5 text-base sm:text-xs font-bold text-brand-blue focus:outline-none focus:border-brand-blue">
           </div>
 
-          <button onclick="saveSharedCoupleDates()" class="w-full bg-slate-900 text-white font-bold text-xs py-3 rounded-xl shadow hover:bg-black transition flex items-center justify-center gap-2">
+          <button onclick="saveSharedCoupleDates()" class="tap-bounce w-full bg-slate-900 text-white font-bold text-xs py-3.5 rounded-xl shadow hover:bg-black transition flex items-center justify-center gap-2">
             <i class="fas fa-sync-alt"></i> Mettre à jour les dates du couple
           </button>
+        </div>
+
+        <!-- Notifications natives via l'icône Love Duo (Google Apps Script + FCM) -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-3">
+          <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center text-sm font-bold">🔔</div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-800">Notifications écran verrouillé</h3>
+                <p class="text-[10px] text-slate-400">Via l'icône sur l'écran d'accueil</p>
+              </div>
+            </div>
+            <span id="my-push-status-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">Inactif</span>
+          </div>
+
+          <button onclick="activateNativePushOnDevice()" id="btn-activate-push" class="tap-bounce w-full bg-rose-500 text-white font-bold text-xs py-3.5 rounded-xl shadow hover:bg-rose-600 transition flex items-center justify-center gap-2">
+            <i class="fas fa-bell"></i> Activer les notifications sur ce téléphone
+          </button>
+
+          <p id="partner-push-status" class="text-[11px] text-slate-500 font-medium text-center">
+            Statut partenaire : vérification...
+          </p>
+
+          <div class="pt-2 border-t border-slate-100">
+            <label class="text-[11px] font-bold text-slate-600 block mb-1">URL du relais Google Apps Script (partagée)</label>
+            <div class="flex gap-2">
+              <input type="url" id="setting-push-relay-url" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base sm:text-xs font-semibold focus:outline-none focus:border-brand-blue">
+              <button onclick="savePushRelayUrl()" class="tap-bounce bg-slate-900 text-white font-bold text-xs px-4 rounded-xl shadow">OK</button>
+            </div>
+          </div>
         </div>
       </section>
     </main>
 
     <!-- Navigation Bar -->
-    <nav id="app-nav" class="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200/80 px-2 py-2 flex justify-around items-center z-50 hidden">
-      <button onclick="switchTab('tab-accueil')" id="nav-tab-accueil" class="nav-btn flex flex-col items-center py-1 px-3 text-brand-blue font-bold">
+    <nav id="app-nav" class="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-2 pt-2 safe-bottom-nav flex justify-around items-center z-40 hidden">
+      <button onclick="switchTab('tab-accueil')" id="nav-tab-accueil" class="nav-btn tap-bounce flex flex-col items-center py-1 px-3 text-brand-blue font-bold">
         <i class="fas fa-house text-lg mb-0.5"></i>
         <span class="text-[10px]">Accueil</span>
       </button>
 
-      <button onclick="switchTab('tab-soutien')" id="nav-tab-soutien" class="nav-btn flex flex-col items-center py-1 px-3 text-slate-400">
+      <button onclick="switchTab('tab-soutien')" id="nav-tab-soutien" class="nav-btn tap-bounce flex flex-col items-center py-1 px-3 text-slate-400">
         <i class="fas fa-hand-holding-heart text-lg mb-0.5"></i>
         <span class="text-[10px]">Soutien</span>
       </button>
 
-      <button onclick="switchTab('tab-photos')" id="nav-tab-photos" class="nav-btn flex flex-col items-center py-1 px-3 text-slate-400">
+      <button onclick="switchTab('tab-photos')" id="nav-tab-photos" class="nav-btn tap-bounce flex flex-col items-center py-1 px-3 text-slate-400">
         <i class="fas fa-images text-lg mb-0.5"></i>
         <span class="text-[10px]">Souvenirs</span>
       </button>
 
-      <button onclick="switchTab('tab-calendrier')" id="nav-tab-calendrier" class="nav-btn flex flex-col items-center py-1 px-3 text-slate-400">
+      <button onclick="switchTab('tab-calendrier')" id="nav-tab-calendrier" class="nav-btn tap-bounce flex flex-col items-center py-1 px-3 text-slate-400">
         <i class="fas fa-calendar-days text-lg mb-0.5"></i>
         <span class="text-[10px]">Calendrier</span>
       </button>
 
-      <button onclick="switchTab('tab-profil')" id="nav-tab-profil" class="nav-btn flex flex-col items-center py-1 px-3 text-slate-400">
+      <button onclick="switchTab('tab-profil')" id="nav-tab-profil" class="nav-btn tap-bounce flex flex-col items-center py-1 px-3 text-slate-400">
         <i class="fas fa-user text-lg mb-0.5"></i>
         <span class="text-[10px]">Compte</span>
       </button>
     </nav>
 
     <!-- LIGHTBOX / VISIONNEUSE PHOTO -->
-    <div id="modal-photo-viewer" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col justify-between p-4 z-50 hidden" onclick="closeModal('modal-photo-viewer')">
-      <div class="flex justify-between items-center text-white pt-2" onclick="event.stopPropagation()">
+    <div id="modal-photo-viewer" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col justify-between p-5 safe-top z-50 hidden" onclick="closeModal('modal-photo-viewer')">
+      <div class="flex justify-between items-center text-white" onclick="event.stopPropagation()">
         <div>
-          <h4 id="viewer-photo-title" class="text-xs font-bold">Photo</h4>
-          <span id="viewer-photo-author" class="text-[10px] text-slate-400"></span>
+          <h4 id="viewer-photo-title" class="text-sm font-bold">Photo</h4>
+          <span id="viewer-photo-author" class="text-xs text-slate-400"></span>
         </div>
-        <button onclick="closeModal('modal-photo-viewer')" class="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center">
-          <i class="fas fa-times text-xs"></i>
+        <button onclick="closeModal('modal-photo-viewer')" class="w-9 h-9 rounded-full bg-white/20 text-white flex items-center justify-center">
+          <i class="fas fa-times text-sm"></i>
         </button>
       </div>
       <div class="flex-1 flex items-center justify-center my-4 overflow-hidden" onclick="event.stopPropagation()">
-        <img id="viewer-photo-img" src="" class="max-h-[70vh] max-w-full rounded-2xl object-contain shadow-2xl">
+        <img id="viewer-photo-img" src="" class="max-h-[70dvh] max-w-full rounded-2xl object-contain shadow-2xl">
       </div>
-      <div class="text-center pb-2" onclick="event.stopPropagation()">
+      <div class="text-center pb-4" onclick="event.stopPropagation()">
         <p id="viewer-photo-sub" class="text-xs text-slate-300 font-medium"></p>
       </div>
     </div>
@@ -446,8 +530,8 @@
           </div>
         </div>
 
-        <button id="breath-btn" onclick="toggleBreathExercise()" class="w-full bg-brand-blue text-white font-extrabold text-xs py-3.5 rounded-2xl shadow-lg hover:bg-brand-darkblue transition">
-          Lancer l'exercice (1 min)
+        <button id="breath-btn" onclick="toggleBreathExercise()" class="tap-bounce w-full bg-brand-blue text-white font-extrabold text-xs py-3.5 rounded-2xl shadow-lg hover:bg-brand-darkblue transition">
+          Lancer l'exercice
         </button>
       </div>
     </div>
@@ -463,11 +547,11 @@
           Le manque est trop fort ? Ne restez pas seul avec ce sentiment !
         </p>
 
-        <div class="space-y-2 mt-4">
-          <button onclick="closeModal('modal-panic'); openCallPartnerModal();" class="w-full bg-brand-blue text-white text-xs font-extrabold py-3 rounded-xl shadow-lg hover:bg-brand-darkblue transition flex items-center justify-center gap-2">
+        <div class="space-y-2.5 mt-4">
+          <button onclick="closeModal('modal-panic'); openCallPartnerModal();" class="tap-bounce w-full bg-brand-blue text-white text-xs font-extrabold py-3.5 rounded-xl shadow-lg hover:bg-brand-darkblue transition flex items-center justify-center gap-2">
             <i class="fas fa-phone"></i> L'appeler directement
           </button>
-          <button onclick="closeModal('modal-panic'); openMessageGeneratorModal();" class="w-full bg-emerald-500 text-white text-xs font-bold py-2.5 rounded-xl shadow hover:bg-emerald-600 transition flex items-center justify-center gap-2">
+          <button onclick="closeModal('modal-panic'); openMessageGeneratorModal();" class="tap-bounce w-full bg-emerald-500 text-white text-xs font-bold py-3 rounded-xl shadow hover:bg-emerald-600 transition flex items-center justify-center gap-2">
             <i class="fas fa-comment-dots"></i> Lui envoyer un mot doux
           </button>
           <button onclick="closeModal('modal-panic')" class="w-full text-slate-400 text-xs font-semibold py-1.5 hover:text-slate-600">
@@ -483,77 +567,82 @@
         <h3 class="text-base font-extrabold text-slate-900 mb-1">Appeler <span id="call-modal-partner-name">l'autre</span></h3>
         <p class="text-[11px] text-slate-400 mb-4" id="call-modal-phone-preview">Numéro : Non renseigné</p>
 
-        <div class="space-y-2 mb-4">
-          <button onclick="triggerDirectPhoneCall()" class="w-full p-3 bg-blue-50 border border-blue-100 rounded-2xl font-bold text-xs text-slate-800 flex items-center justify-between">
-            <span class="flex items-center gap-2"><i class="fas fa-phone text-brand-blue"></i> Appel classique</span>
+        <div class="space-y-2.5 mb-4">
+          <button onclick="triggerDirectPhoneCall()" class="tap-bounce w-full p-3.5 bg-blue-50 border border-blue-100 rounded-2xl font-bold text-xs text-slate-800 flex items-center justify-between">
+            <span class="flex items-center gap-2.5"><i class="fas fa-phone text-brand-blue"></i> Appel classique</span>
             <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
           </button>
 
-          <button onclick="triggerWhatsAppCall()" class="w-full p-3 bg-emerald-50 border border-emerald-100 rounded-2xl font-bold text-xs text-slate-800 flex items-center justify-between">
-            <span class="flex items-center gap-2"><i class="fab fa-whatsapp text-emerald-600"></i> WhatsApp Audio</span>
+          <button onclick="triggerWhatsAppCall()" class="tap-bounce w-full p-3.5 bg-emerald-50 border border-emerald-100 rounded-2xl font-bold text-xs text-slate-800 flex items-center justify-between">
+            <span class="flex items-center gap-2.5"><i class="fab fa-whatsapp text-emerald-600 text-sm"></i> Ouvrir WhatsApp</span>
             <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
           </button>
         </div>
 
-        <button onclick="closeModal('modal-call-partner')" class="text-xs text-slate-400 font-medium">Annuler</button>
+        <button onclick="closeModal('modal-call-partner')" class="text-xs text-slate-400 font-medium py-1">Annuler</button>
       </div>
     </div>
 
+    <!-- MODAL MESSAGE MIGNON -->
     <div id="modal-message" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
       <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl text-center">
         <h3 class="text-base font-extrabold text-slate-900 mb-2">Message Mignon</h3>
         <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs italic font-semibold text-slate-700 mb-4 leading-relaxed" id="generated-msg-text">"Tu me manques fort !"</div>
         <div class="flex gap-2 mb-2">
-          <button onclick="generateRandomSweetMessage()" class="flex-1 bg-slate-100 text-xs py-2.5 rounded-xl font-bold text-slate-600">Autre</button>
-          <button onclick="copyGeneratedMessage()" class="flex-1 bg-brand-blue text-white text-xs font-bold py-2.5 rounded-xl shadow">Copier</button>
+          <button onclick="generateRandomSweetMessage()" class="tap-bounce flex-1 bg-slate-100 text-xs py-3 rounded-xl font-bold text-slate-600">Autre idée</button>
+          <button onclick="copyGeneratedMessage()" class="tap-bounce flex-1 bg-brand-blue text-white text-xs font-bold py-3 rounded-xl shadow">Copier</button>
         </div>
         <button onclick="closeModal('modal-message')" class="text-xs text-slate-400 font-medium mt-2">Fermer</button>
       </div>
     </div>
 
+    <!-- MODAL AJOUT PHOTO SOUVENIR -->
     <div id="modal-memory" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
       <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl">
-        <h3 class="text-base font-extrabold text-slate-900 mb-1">Ajouter un souvenir</h3>
+        <h3 class="text-base font-extrabold text-slate-900 mb-2">Ajouter un souvenir</h3>
         <input type="file" id="memory-file-input" accept="image/*" class="hidden" onchange="handleMemoryImageSelect(event)">
-        <div onclick="document.getElementById('memory-file-input').click()" class="border-2 border-dashed border-slate-300 rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer bg-slate-50 hover:bg-slate-100 transition mb-3 relative overflow-hidden min-h-[140px]">
+        <div onclick="document.getElementById('memory-file-input').click()" class="border-2 border-dashed border-slate-300 rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer bg-slate-50 active:bg-slate-100 transition mb-3 relative overflow-hidden min-h-[140px]">
           <div id="upload-placeholder" class="text-center">
             <i class="fas fa-cloud-arrow-up text-2xl text-brand-blue mb-1"></i>
             <span class="text-xs font-bold text-slate-700 block">Choisir une photo</span>
           </div>
           <img id="upload-preview-img" src="" class="absolute inset-0 w-full h-full object-cover hidden">
         </div>
-        <input type="text" id="memory-title-input" placeholder="Titre..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs mb-2">
-        <input type="text" id="memory-subtitle-input" placeholder="Sous-titre..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs mb-4">
+        <input type="text" id="memory-title-input" placeholder="Titre..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-base sm:text-xs mb-2">
+        <input type="text" id="memory-subtitle-input" placeholder="Sous-titre (optionnel)..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-base sm:text-xs mb-4">
         <div class="flex gap-2">
-          <button onclick="closeModal('modal-memory')" class="flex-1 bg-slate-100 text-xs py-2.5 rounded-xl font-bold">Annuler</button>
-          <button onclick="saveNewMemory()" id="btn-publish-memory" class="flex-1 bg-brand-blue text-white text-xs font-bold py-2.5 rounded-xl">Publier</button>
+          <button onclick="closeModal('modal-memory')" class="tap-bounce flex-1 bg-slate-100 text-xs py-3 rounded-xl font-bold text-slate-600">Annuler</button>
+          <button onclick="saveNewMemory()" id="btn-publish-memory" class="tap-bounce flex-1 bg-brand-blue text-white text-xs font-bold py-3 rounded-xl shadow">Publier</button>
         </div>
       </div>
     </div>
 
+    <!-- MODAL AJOUT PENSÉE -->
     <div id="modal-thought" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
       <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl">
-        <h3 class="text-base font-extrabold text-slate-900 mb-2">Noter une pensée</h3>
-        <textarea id="thought-input-text" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs" rows="3" placeholder="Votre pensée..."></textarea>
+        <h3 class="text-base font-extrabold text-slate-900 mb-2">Noter une pensée 💭</h3>
+        <textarea id="thought-input-text" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-base sm:text-xs focus:outline-none focus:border-brand-blue" rows="3" placeholder="Écrivez votre pensée du moment..."></textarea>
         <div class="flex gap-2 mt-3">
-          <button onclick="closeModal('modal-thought')" class="flex-1 bg-slate-100 text-xs py-2 rounded-xl">Annuler</button>
-          <button onclick="saveNewThought()" class="flex-1 bg-brand-blue text-white text-xs font-bold py-2 rounded-xl">Enregistrer</button>
+          <button onclick="closeModal('modal-thought')" class="tap-bounce flex-1 bg-slate-100 text-xs font-bold text-slate-600 py-3 rounded-xl">Annuler</button>
+          <button onclick="saveNewThought()" class="tap-bounce flex-1 bg-brand-blue text-white text-xs font-bold py-3 rounded-xl shadow">Enregistrer</button>
         </div>
       </div>
     </div>
 
+    <!-- MODAL PROJETS RETROUVAILLES -->
     <div id="modal-reunion-projects" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
       <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl">
         <h3 class="text-base font-extrabold text-slate-900 mb-2">Projets du couple 🎉</h3>
-        <div class="space-y-2 max-h-48 overflow-y-auto mb-3" id="reunion-projects-list"></div>
+        <div class="space-y-2 max-h-52 overflow-y-auto mb-3 hide-scrollbar" id="reunion-projects-list"></div>
         <div class="flex gap-2">
-          <input type="text" id="new-project-input" placeholder="Nouvelle idée..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs">
-          <button onclick="addNewReunionProject()" class="bg-amber-500 text-white font-bold px-3 py-2 rounded-xl text-xs">+</button>
+          <input type="text" id="new-project-input" placeholder="Nouvelle idée..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base sm:text-xs focus:outline-none focus:border-amber-500">
+          <button onclick="addNewReunionProject()" class="tap-bounce bg-amber-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm shadow">+</button>
         </div>
-        <button onclick="closeModal('modal-reunion-projects')" class="w-full text-slate-400 text-xs mt-3">Fermer</button>
+        <button onclick="closeModal('modal-reunion-projects')" class="w-full text-slate-400 text-xs font-semibold mt-3 py-1">Fermer</button>
       </div>
     </div>
 
+    <!-- MODAL TÉLÉPORTATION -->
     <div id="modal-teleport" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
       <div class="bg-slate-900 border border-slate-800 text-white w-full max-w-xs rounded-3xl p-5 shadow-2xl text-center">
         <div class="w-14 h-14 bg-cyan-500/20 text-cyan-400 rounded-full flex items-center justify-center mx-auto text-2xl mb-3">
@@ -562,9 +651,9 @@
         <h3 class="text-base font-extrabold text-white mb-1">Téléportation</h3>
         <p class="text-[11px] text-slate-400 mb-3" id="teleport-modal-status">1 crédit disponible par période de manque.</p>
         <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-left font-mono text-[10px] text-cyan-400 mb-4 h-24 overflow-y-auto" id="teleport-terminal">
-          > Système prêt.<br>> Crédit disponible : 1/1.
+          &gt; Système prêt.<br>&gt; Crédit disponible : 1/1.
         </div>
-        <button onclick="runTeleportSequence()" id="teleport-launch-btn" class="w-full bg-cyan-500 text-slate-900 text-xs font-bold py-2.5 rounded-xl shadow mb-2 hover:bg-cyan-400 transition">Lancer le transfert</button>
+        <button onclick="runTeleportSequence()" id="teleport-launch-btn" class="tap-bounce w-full bg-cyan-500 text-slate-900 text-xs font-bold py-3 rounded-xl shadow mb-2 hover:bg-cyan-400 transition">Lancer le transfert</button>
         <button onclick="closeModal('modal-teleport')" class="w-full text-xs text-slate-400 py-1">Fermer</button>
       </div>
     </div>
@@ -575,7 +664,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, onSnapshot, setDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, onSnapshot, setDoc, getDoc, collection } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCMVojNde1zUs8pNn7Lkw5oxZb2hbhGAq0",
@@ -598,19 +687,33 @@
     let breathInterval = null;
     let breathIsRunning = false;
     let partnerPhone = "";
+    let partnerFcmToken = "";
+    let initialPingLoaded = false;
+    let usersUnsubscribe = null;
 
     window.appState = {
-      userProfile: { name: "", phone: "", teleportUsedForTarget: "", mood: "" },
+      userProfile: { name: "", phone: "", teleportUsedForTarget: "", mood: "", fcmToken: "" },
       sharedData: { 
         startDate: new Date(Date.now() - 3*24*60*60*1000).toISOString(),
         targetDate: new Date(Date.now() + 3*24*60*60*1000).toISOString(), 
-        thoughts: [], memories: [], reunionProjects: [], lastLovePing: null, moods: {}
+        thoughts: [], memories: [], reunionProjects: [], lastLovePing: null, moods: {}, pushRelayUrl: ""
       }
+    };
+
+    // Sécurisation de l'affichage texte (évite les bugs d'apostrophes/guillemets)
+    const escapeHtml = (str) => {
+      return String(str || '')
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     };
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
+        initialPingLoaded = false;
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('app-container').classList.remove('hidden');
         document.getElementById('app-nav').classList.remove('hidden');
@@ -619,7 +722,7 @@
         if (userDoc.exists()) {
           window.appState.userProfile = userDoc.data();
         } else {
-          window.appState.userProfile = { name: user.email.split('@')[0], phone: "", teleportUsedForTarget: "", mood: "" };
+          window.appState.userProfile = { name: user.email.split('@')[0], phone: "", teleportUsedForTarget: "", mood: "", fcmToken: "" };
         }
 
         window.fetchPartnerProfile();
@@ -628,15 +731,20 @@
           if (snapshot.exists()) {
             const data = snapshot.data();
             
-            if (data.lastLovePing && data.lastLovePing.sender !== (window.appState.userProfile.name || 'Moi')) {
+            // Évite de rejouer un vieux ping à l'ouverture de l'app
+            if (!initialPingLoaded) {
+              if (data.lastLovePing) window.lastPingTime = data.lastLovePing.time;
+              initialPingLoaded = true;
+            } else if (data.lastLovePing && data.lastLovePing.sender !== (window.appState.userProfile.name || 'Moi')) {
               if (!window.lastPingTime || data.lastLovePing.time > window.lastPingTime) {
                 window.lastPingTime = data.lastLovePing.time;
                 window.triggerLovePingEffect(data.lastLovePing.sender);
               }
             }
 
-            window.appState.sharedData = data;
+            window.appState.sharedData = { ...window.appState.sharedData, ...data };
             window.renderSharedContent();
+            window.renderUserProfile();
           }
         });
 
@@ -647,34 +755,57 @@
           }
         });
 
+        // Renouvelle silencieusement le jeton Push si déjà autorisé
+        if ("Notification" in window && Notification.permission === "granted" && window.enablePushNotifications) {
+          window.enablePushNotifications(true);
+        }
+
         window.renderUserProfile();
       } else {
         currentUser = null;
+        if (usersUnsubscribe) {
+          usersUnsubscribe();
+          usersUnsubscribe = null;
+        }
         document.getElementById('auth-screen').classList.remove('hidden');
         document.getElementById('app-container').classList.add('hidden');
         document.getElementById('app-nav').classList.add('hidden');
       }
     });
 
-    window.fetchPartnerProfile = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "users"));
+    // Synchronisation temps réel du téléphone et du jeton Push du partenaire
+    window.fetchPartnerProfile = () => {
+      if (usersUnsubscribe) usersUnsubscribe();
+      usersUnsubscribe = onSnapshot(collection(db, "users"), (querySnapshot) => {
+        partnerFcmToken = "";
         querySnapshot.forEach((docSnap) => {
-          if (docSnap.id !== currentUser.uid) {
+          if (currentUser && docSnap.id !== currentUser.uid) {
             const data = docSnap.data();
             if (data.phone) {
               partnerPhone = data.phone;
-              window.updatePartnerPhoneUI();
+            }
+            if (data.fcmToken) {
+              partnerFcmToken = data.fcmToken;
             }
           }
         });
-      } catch (e) { console.log(e); }
+        window.updatePartnerPhoneUI();
+        window.updatePushStatusUI();
+      });
+    };
+
+    window.getPartnerIdentity = () => {
+      const me = window.appState.userProfile.name || 'Moi';
+      const isLauriane = me.toLowerCase().includes('lauriane');
+      return {
+        me,
+        isLauriane,
+        partnerName: isLauriane ? 'Ben' : 'Lauriane'
+      };
     };
 
     window.updatePartnerPhoneUI = () => {
-      const me = window.appState.userProfile.name || 'Moi';
-      const isLauriane = me.toLowerCase().includes('lauriane');
-      const partnerName = isLauriane ? 'Ben' : 'Lauriane';
+      const { partnerName } = window.getPartnerIdentity();
 
       const phoneSub = document.getElementById('soutien-phone-sub');
       if (phoneSub) {
@@ -686,50 +817,124 @@
       }
     };
 
+    window.updatePushStatusUI = () => {
+      const { partnerName } = window.getPartnerIdentity();
+      const myBadge = document.getElementById('my-push-status-badge');
+      const partnerStatus = document.getElementById('partner-push-status');
+
+      const hasMyToken = Boolean(window.appState.userProfile.fcmToken) && ("Notification" in window && Notification.permission === "granted");
+      if (myBadge) {
+        if (hasMyToken) {
+          myBadge.innerText = "Actif ✓";
+          myBadge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700";
+        } else {
+          myBadge.innerText = "À activer";
+          myBadge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700";
+        }
+      }
+
+      if (partnerStatus) {
+        if (partnerFcmToken) {
+          partnerStatus.innerHTML = `<span class="text-emerald-600 font-bold">✓ ${escapeHtml(partnerName)} peut recevoir vos notifications en veille</span>`;
+        } else {
+          partnerStatus.innerHTML = `<span class="text-slate-400">${escapeHtml(partnerName)} n'a pas encore activé ses notifications</span>`;
+        }
+      }
+    };
+
     window.loginUser = async () => {
-      const email = document.getElementById('auth-email').value;
+      const email = document.getElementById('auth-email').value.trim();
       const pass = document.getElementById('auth-password').value;
-      try { await signInWithEmailAndPassword(auth, email, pass); } catch (err) { alert(err.message); }
+      try { await signInWithEmailAndPassword(auth, email, pass); } catch (err) { alert("Erreur de connexion : " + err.message); }
     };
 
     window.registerUser = async () => {
-      const email = document.getElementById('auth-email').value;
+      const email = document.getElementById('auth-email').value.trim();
       const pass = document.getElementById('auth-password').value;
       try {
         const res = await createUserWithEmailAndPassword(auth, email, pass);
-        await setDoc(doc(db, "users", res.user.uid), { name: email.split('@')[0], phone: "", teleportUsedForTarget: "", mood: "" });
-      } catch (err) { alert(err.message); }
+        await setDoc(doc(db, "users", res.user.uid), { name: email.split('@')[0], phone: "", teleportUsedForTarget: "", mood: "", fcmToken: "" });
+      } catch (err) { alert("Erreur création compte : " + err.message); }
     };
 
     window.logoutUser = () => signOut(auth);
 
-    // ENVOI PING AMOUR & NOTIFICATION PUSH
+    // CONFIGURATION RELAIS GOOGLE APPS SCRIPT & ACTIVATION PUSH NATIF
+    window.savePushRelayUrl = async () => {
+      const url = document.getElementById('setting-push-relay-url').value.trim();
+      window.appState.sharedData.pushRelayUrl = url;
+      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), { pushRelayUrl: url }, { merge: true });
+      window.showToast(url ? "Relais Google Script enregistré ! 🔔" : "URL du relais effacée.");
+    };
+
+    window.activateNativePushOnDevice = async () => {
+      if (!("Notification" in window)) {
+        return alert("Sur iPhone, ouvrez l'application depuis l'icône ajoutée sur votre écran d'accueil (iOS 16.4+ requis) pour activer les notifications.");
+      }
+      if (!window.enablePushNotifications) {
+        return alert("Le service de notification se charge encore ou sw.js est introuvable sur GitHub. Réessayez dans 2 secondes.");
+      }
+
+      const btn = document.getElementById('btn-activate-push');
+      if (btn) btn.disabled = true;
+
+      try {
+        const ok = await window.enablePushNotifications(false);
+        if (ok) {
+          window.updatePushStatusUI();
+          window.showToast("Notifications activées sur ce téléphone ! 🔔💖");
+        }
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    };
+
+    // ENVOI PING AMOUR & NOTIFICATION ÉCRAN VERROUILLÉ VIA GOOGLE APPS SCRIPT
     window.sendLovePing = async () => {
-      if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
-        await Notification.requestPermission();
-      }
+      const btn = document.getElementById('btn-love-ping');
+      if (btn) btn.disabled = true;
 
-      if (window.enablePushNotifications) {
-        await window.enablePushNotifications();
-      }
+      try {
+        const { me } = window.getPartnerIdentity();
 
-      const me = window.appState.userProfile.name || 'Moi';
-      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), {
-        lastLovePing: { sender: me, time: Date.now() }
-      }, { merge: true });
-      try { confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } }); } catch(e){}
-      window.showToast("Pensée envoyée en direct ! 💭💕");
+        // 1. Mise à jour temps réel Firestore (quand l'autre a l'app ouverte)
+        await setDoc(doc(db, "couples", COUPLE_ROOM_ID), {
+          lastLovePing: { sender: me, time: Date.now() }
+        }, { merge: true });
+
+        // 2. Notification Web Push native (quand le téléphone de l'autre est en veille / app fermée)
+        const relayUrl = (window.appState.sharedData.pushRelayUrl || '').trim();
+        if (relayUrl && partnerFcmToken) {
+          fetch(relayUrl, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              token: partnerFcmToken,
+              sender: me,
+              url: window.location.href
+            })
+          }).catch((e) => console.log("Erreur relais push:", e));
+        }
+
+        try { confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } }); } catch(e){}
+        window.showToast("Pensée envoyée en direct ! 💭💕");
+      } finally {
+        setTimeout(() => { if (btn) btn.disabled = false; }, 1200);
+      }
     };
 
     window.triggerLovePingEffect = (senderName) => {
       try { confetti({ particleCount: 80, spread: 80, origin: { y: 0.5 } }); } catch(e){}
-      window.showToast(`${senderName} vient de vous envoyer un "Je pense à toi" ! 💖`);
+      window.showToast(`${senderName} vient de vous envoyer un « Je pense à toi » ! 💖`);
 
       if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("Love Tracker Duo 💖", {
-          body: `${senderName} pense à toi en ce moment !`,
-          icon: "https://cdn-icons-png.flaticon.com/512/2589/2589175.png"
-        });
+        try {
+          new Notification("Love Tracker Duo 💖", {
+            body: `${senderName} pense à toi en ce moment !`,
+            icon: "https://cdn-icons-png.flaticon.com/512/2589/2589175.png"
+          });
+        } catch (e) {}
       }
     };
 
@@ -804,6 +1009,7 @@
         document.getElementById('upload-placeholder').classList.remove('hidden');
         document.getElementById('memory-title-input').value = '';
         document.getElementById('memory-subtitle-input').value = '';
+        document.getElementById('memory-file-input').value = '';
 
         window.closeModal('modal-memory');
         window.showToast("Photo publiée dans l'album ! 📸");
@@ -834,7 +1040,7 @@
       const circle = document.getElementById('breath-circle');
       const text = document.getElementById('breath-instruction');
       btn.innerText = "Arrêter l'exercice";
-      btn.className = "w-full bg-slate-800 text-white font-extrabold text-xs py-3.5 rounded-2xl shadow transition";
+      btn.className = "tap-bounce w-full bg-slate-800 text-white font-extrabold text-xs py-3.5 rounded-2xl shadow transition";
 
       let step = 0;
       const runStep = () => {
@@ -849,7 +1055,7 @@
           text.className = "text-xs font-bold text-white";
         } else if (step === 2) {
           circle.className = "breath-circle w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-xs exhale";
-          text.innerText = "Exspirez...";
+          text.innerText = "Expirez...";
           text.className = "text-xs font-bold text-white";
         }
         step = (step + 1) % 3;
@@ -866,8 +1072,8 @@
       const circle = document.getElementById('breath-circle');
       const text = document.getElementById('breath-instruction');
       if (btn) {
-        btn.innerText = "Lancer l'exercice (1 min)";
-        btn.className = "w-full bg-brand-blue text-white font-extrabold text-xs py-3.5 rounded-2xl shadow-lg hover:bg-brand-darkblue transition";
+        btn.innerText = "Lancer l'exercice";
+        btn.className = "tap-bounce w-full bg-brand-blue text-white font-extrabold text-xs py-3.5 rounded-2xl shadow-lg hover:bg-brand-darkblue transition";
       }
       if (circle) circle.className = "breath-circle w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center shadow-inner border border-slate-200";
       if (text) {
@@ -889,9 +1095,9 @@
     window.getAuthorStyles = (authorName) => {
       const name = (authorName || '').toLowerCase();
       if (name.includes('lauriane')) {
-        return { badge: "bg-rose-100 text-rose-700 border-rose-200", border: "border-rose-200 bg-rose-50/20" };
+        return { badge: "bg-rose-100 text-rose-700 border-rose-200", border: "border-rose-200 bg-rose-50/30" };
       }
-      return { badge: "bg-blue-100 text-brand-blue border-blue-200", border: "border-blue-200 bg-blue-50/20" };
+      return { badge: "bg-blue-100 text-brand-blue border-blue-200", border: "border-blue-200 bg-blue-50/30" };
     };
 
     window.saveMyPersonalProfile = async () => {
@@ -902,6 +1108,7 @@
 
       await setDoc(doc(db, "users", currentUser.uid), window.appState.userProfile, { merge: true });
       window.renderUserProfile();
+      window.renderSharedContent();
       window.showToast("Profil enregistré !");
     };
 
@@ -922,21 +1129,65 @@
       window.showToast("Dates du couple mises à jour !");
     };
 
+    // GESTION DES PENSÉES : AJOUT, SUPPRESSION INDIVIDUELLE & VIDAGE FIN DE DÉCOMPTE
     window.saveNewThought = async () => {
       const input = document.getElementById('thought-input-text');
       if (!input.value.trim()) return;
       if (!window.appState.sharedData.thoughts) window.appState.sharedData.thoughts = [];
       
-      window.appState.sharedData.thoughts.unshift({ text: input.value.trim(), author: window.appState.userProfile.name || 'Moi' });
+      window.appState.sharedData.thoughts.unshift({
+        id: Date.now(),
+        text: input.value.trim(),
+        author: window.appState.userProfile.name || 'Moi',
+        date: new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+      });
+
       await setDoc(doc(db, "couples", COUPLE_ROOM_ID), { thoughts: window.appState.sharedData.thoughts }, { merge: true });
       input.value = '';
       window.closeModal('modal-thought');
-      window.showToast("Pensée partagée !");
+      window.showToast("Pensée partagée ! 💭");
+    };
+
+    window.deleteThought = async (index) => {
+      if (!confirm("Supprimer cette pensée ?")) return;
+      if (!window.appState.sharedData.thoughts) return;
+
+      window.appState.sharedData.thoughts.splice(index, 1);
+      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), { thoughts: window.appState.sharedData.thoughts }, { merge: true });
+      window.showToast("Pensée supprimée !");
+    };
+
+    window.clearAllThoughts = async () => {
+      const now = Date.now();
+      const target = new Date(window.appState.sharedData.targetDate || now).getTime();
+
+      if (target - now > 0) {
+        return window.showToast("Le bouton n'est actif qu'une fois le décompte terminé !");
+      }
+
+      if (!confirm("Vider toutes les pensées pour repartir à zéro à la prochaine absence ?\n(Vos photos souvenirs resteront intactes)")) {
+        return;
+      }
+
+      window.appState.sharedData.thoughts = [];
+      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), { thoughts: [] }, { merge: true });
+      window.showToast("Toutes les pensées ont été vidées ! ✨");
+    };
+
+    window.updateClearThoughtsButtons = (isFinished) => {
+      const hasThoughts = window.appState.sharedData.thoughts && window.appState.sharedData.thoughts.length > 0;
+      const showBtn = isFinished && hasThoughts;
+
+      const btnSouvenirs = document.getElementById('btn-clear-thoughts-souvenirs');
+      const btnHome = document.getElementById('btn-clear-thoughts-home');
+
+      if (btnSouvenirs) btnSouvenirs.classList.toggle('hidden', !showBtn);
+      if (btnHome) btnHome.classList.toggle('hidden', !showBtn);
     };
 
     window.deleteMemory = async (id) => {
       if (!confirm("Voulez-vous vraiment supprimer cette photo ?")) return;
-      window.appState.sharedData.memories = window.appState.sharedData.memories.filter(m => m.id !== id);
+      window.appState.sharedData.memories = (window.appState.sharedData.memories || []).filter(m => m.id !== id);
       await setDoc(doc(db, "couples", COUPLE_ROOM_ID), { memories: window.appState.sharedData.memories }, { merge: true });
       window.showToast("Photo supprimée !");
     };
@@ -952,17 +1203,23 @@
       window.showToast("Projet ajouté !");
     };
 
+    window.deleteReunionProject = async (index) => {
+      if (!window.appState.sharedData.reunionProjects) return;
+      window.appState.sharedData.reunionProjects.splice(index, 1);
+      await setDoc(doc(db, "couples", COUPLE_ROOM_ID), { reunionProjects: window.appState.sharedData.reunionProjects }, { merge: true });
+    };
+
     window.renderUserProfile = () => {
       const p = window.appState.userProfile;
+      const { partnerName } = window.getPartnerIdentity();
+
       document.getElementById('my-name-pill').innerText = `Compte : ${p.name || 'Moi'}`;
       document.getElementById('setting-my-name').value = p.name || '';
       document.getElementById('setting-my-phone').value = p.phone || '';
-
-      const isLauriane = (p.name || '').toLowerCase().includes('lauriane');
-      const partnerName = isLauriane ? 'Ben' : 'Lauriane';
       document.getElementById('header-partner-name').innerText = partnerName;
 
       window.updatePartnerPhoneUI();
+      window.updatePushStatusUI();
 
       if (window.appState.sharedData.targetDate) {
         const dTarget = new Date(window.appState.sharedData.targetDate);
@@ -975,82 +1232,119 @@
         dStart.setMinutes(dStart.getMinutes() - dStart.getTimezoneOffset());
         document.getElementById('setting-start-date').value = dStart.toISOString().slice(0, 16);
       }
+
+      const relayInput = document.getElementById('setting-push-relay-url');
+      if (relayInput && document.activeElement !== relayInput) {
+        relayInput.value = window.appState.sharedData.pushRelayUrl || '';
+      }
     };
 
     window.renderSharedContent = () => {
       const s = window.appState.sharedData;
-      const me = window.appState.userProfile.name || 'Moi';
-      const isLauriane = me.toLowerCase().includes('lauriane');
-      const partnerName = isLauriane ? 'Ben' : 'Lauriane';
+      const { me, partnerName } = window.getPartnerIdentity();
 
+      // Humeur du partenaire
       if (s.moods) {
-        const partnerMood = Object.keys(s.moods).find(k => k.toLowerCase() !== me.toLowerCase());
+        const partnerMoodKey = Object.keys(s.moods).find(k => k.toLowerCase() !== me.toLowerCase());
         const partnerMoodEl = document.getElementById('partner-mood-display');
-        if (partnerMood && s.moods[partnerMood]) {
-          partnerMoodEl.innerHTML = `<i class="fas fa-smile text-brand-blue"></i> <span>Humeur de ${partnerName} : <b>${s.moods[partnerMood]}</b></span>`;
+        if (partnerMoodKey && s.moods[partnerMoodKey]) {
+          partnerMoodEl.innerHTML = `<i class="fas fa-smile text-brand-blue"></i> <span>Humeur de ${escapeHtml(partnerName)} : <b>${escapeHtml(s.moods[partnerMoodKey])}</b></span>`;
         }
       }
 
+      // Galerie Photos
       const gallery = document.getElementById('gallery-grid');
       gallery.innerHTML = '';
       if (s.memories && s.memories.length > 0) {
         s.memories.forEach(m => {
           const style = window.getAuthorStyles(m.author);
           gallery.innerHTML += `
-            <div class="bg-white rounded-2xl overflow-hidden border ${style.border} shadow-sm flex flex-col justify-between relative group">
-              <div onclick="openPhotoViewer('${m.img}', '${m.title.replace(/'/g, "\\'")}', '${m.sub.replace(/'/g, "\\'")}', '${m.author}')" class="h-32 w-full bg-slate-100 cursor-pointer overflow-hidden relative">
-                <img src="${m.img}" class="w-full h-full object-cover">
-                <span class="absolute top-2 left-2 border backdrop-blur-md font-bold px-2 py-0.5 rounded-md text-[9px] ${style.badge}">${m.author}</span>
+            <div class="bg-white rounded-2xl overflow-hidden border ${style.border} shadow-sm flex flex-col justify-between relative">
+              <div onclick="openPhotoViewerById(${m.id})" class="h-36 w-full bg-slate-100 cursor-pointer overflow-hidden relative">
+                <img src="${m.img}" loading="lazy" class="w-full h-full object-cover">
+                <span class="absolute top-2 left-2 border backdrop-blur-md font-bold px-2 py-0.5 rounded-md text-[9px] ${style.badge}">${escapeHtml(m.author)}</span>
               </div>
-              <div class="p-2.5 flex items-center justify-between">
-                <div class="truncate pr-1">
-                  <h4 class="font-bold text-xs text-slate-800 truncate">${m.title}</h4>
-                  <p class="text-[10px] text-slate-400 truncate">${m.sub || m.date}</p>
+              <div class="p-2.5 flex items-center justify-between gap-1">
+                <div class="truncate">
+                  <h4 class="font-bold text-xs text-slate-800 truncate">${escapeHtml(m.title)}</h4>
+                  <p class="text-[10px] text-slate-400 truncate">${escapeHtml(m.sub || m.date)}</p>
                 </div>
-                <button onclick="deleteMemory(${m.id})" class="text-slate-300 hover:text-rose-500 transition p-1"><i class="fas fa-trash-can text-xs"></i></button>
+                <button onclick="deleteMemory(${m.id})" class="text-slate-300 hover:text-rose-500 active:text-rose-600 transition p-1.5 shrink-0" aria-label="Supprimer la photo">
+                  <i class="fas fa-trash-can text-xs"></i>
+                </button>
               </div>
             </div>`;
         });
       } else {
-        gallery.innerHTML = '<p class="col-span-2 text-center text-xs text-slate-400 py-6">Aucune photo partagée.</p>';
+        gallery.innerHTML = '<p class="col-span-2 text-center text-xs text-slate-400 py-6">Aucune photo partagée pour le moment.</p>';
       }
 
+      // Liste des pensées (Souvenirs + Aperçu Accueil) avec suppression individuelle
       const thoughtsList = document.getElementById('thoughts-list');
+      const homePreview = document.getElementById('home-thoughts-preview');
       thoughtsList.innerHTML = '';
+      if (homePreview) homePreview.innerHTML = '';
+
       if (s.thoughts && s.thoughts.length > 0) {
-        s.thoughts.forEach(t => {
+        s.thoughts.forEach((t, idx) => {
           const style = window.getAuthorStyles(t.author);
-          thoughtsList.innerHTML += `
-            <div class="bg-white p-3 rounded-2xl border ${style.border} shadow-sm">
-              <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-md border ${style.badge}">${t.author}</span>
-              <p class="text-xs text-slate-700 italic mt-1 font-medium">"${t.text}"</p>
+          const dateBadge = t.date ? `<span class="text-[9px] text-slate-400 font-medium">${escapeHtml(t.date)}</span>` : '';
+          const cardHtml = `
+            <div class="bg-white p-3.5 rounded-2xl border ${style.border} shadow-sm flex justify-between items-start gap-2">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-md border ${style.badge}">${escapeHtml(t.author)}</span>
+                  ${dateBadge}
+                </div>
+                <p class="text-xs text-slate-700 italic mt-1.5 font-medium break-words leading-relaxed">"${escapeHtml(t.text)}"</p>
+              </div>
+              <button onclick="deleteThought(${idx})" class="text-slate-300 hover:text-rose-500 active:text-rose-600 transition p-1.5 -mr-1 -mt-1 shrink-0" title="Supprimer cette pensée">
+                <i class="fas fa-trash-can text-xs"></i>
+              </button>
             </div>`;
+
+          thoughtsList.innerHTML += cardHtml;
+          if (homePreview && idx < 2) {
+            homePreview.innerHTML += cardHtml;
+          }
         });
+      } else {
+        thoughtsList.innerHTML = '<p class="text-center text-xs text-slate-400 py-4 bg-white rounded-2xl border border-slate-100">Aucune pensée enregistrée pour cette absence.</p>';
       }
 
+      // Projets retrouvailles
       const projects = document.getElementById('reunion-projects-list');
       projects.innerHTML = '';
-      if (s.reunionProjects) {
+      if (s.reunionProjects && s.reunionProjects.length > 0) {
         document.getElementById('stat-projects-count').innerText = s.reunionProjects.length;
-        s.reunionProjects.forEach(p => {
+        s.reunionProjects.forEach((p, idx) => {
           const style = window.getAuthorStyles(p.author);
           projects.innerHTML += `
-            <div class="p-2.5 bg-slate-50 border ${style.border} rounded-xl text-xs flex justify-between items-center font-medium">
-              <span>${p.text}</span>
-              <span class="text-[9px] font-bold px-2 py-0.5 rounded-md border ${style.badge}">${p.author}</span>
+            <div class="p-2.5 bg-slate-50 border ${style.border} rounded-xl text-xs flex justify-between items-center gap-2 font-medium">
+              <span class="break-words flex-1">${escapeHtml(p.text)}</span>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span class="text-[9px] font-bold px-2 py-0.5 rounded-md border ${style.badge}">${escapeHtml(p.author)}</span>
+                <button onclick="deleteReunionProject(${idx})" class="text-slate-300 hover:text-rose-500 px-1"><i class="fas fa-times text-xs"></i></button>
+              </div>
             </div>`;
         });
+      } else {
+        document.getElementById('stat-projects-count').innerText = '0';
+        projects.innerHTML = '<p class="text-center text-xs text-slate-400 py-3">Aucun projet noté pour l\'instant.</p>';
       }
 
       window.updateCountdown();
     };
 
     window.updateCountdown = () => {
-      const now = new Date().getTime();
-      const target = new Date(window.appState.sharedData.targetDate || Date.now()).getTime();
-      const start = new Date(window.appState.sharedData.startDate || (Date.now() - 3*24*60*60*1000)).getTime();
+      const now = Date.now();
+      const target = new Date(window.appState.sharedData.targetDate || now).getTime();
+      const start = new Date(window.appState.sharedData.startDate || (now - 3*24*60*60*1000)).getTime();
 
-      const diff = Math.max(0, target - now);
+      const rawDiff = target - now;
+      const isFinished = rawDiff <= 0;
+      const diff = Math.max(0, rawDiff);
+
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -1061,8 +1355,17 @@
       document.getElementById('cd-mins').innerText = String(mins).padStart(2, '0');
       document.getElementById('cd-secs').innerText = String(secs).padStart(2, '0');
       document.getElementById('stat-dodos').innerText = days;
-      document.getElementById('dodos-badge').innerText = `${days} dodos`;
-      document.getElementById('sleeps-summary').innerText = `Plus que ${days} dodo${days > 1 ? 's' : ''} ! 🌙`;
+      document.getElementById('dodos-badge').innerText = `${days} dodo${days > 1 ? 's' : ''}`;
+
+      const sleepsEl = document.getElementById('sleeps-summary');
+      if (isFinished) {
+        sleepsEl.innerText = "C'est l'heure des retrouvailles ! 🎉💖";
+      } else {
+        sleepsEl.innerText = `Plus que ${days} dodo${days > 1 ? 's' : ''} ! 🌙`;
+      }
+
+      // Affichage dynamique du bouton "Vider les pensées" dès que le décompte est terminé
+      window.updateClearThoughtsButtons(isFinished);
 
       const totalSpan = Math.max(1, target - start);
       const elapsedSpan = Math.max(0, now - start);
@@ -1071,10 +1374,15 @@
       document.getElementById('calendar-progress-bar').style.width = `${percent}%`;
       document.getElementById('calendar-progress-percent').innerText = `${percent}%`;
 
-      window.renderCalendarGrid(days);
+      window.renderCalendarGrid(days, isFinished);
     };
 
-    window.renderCalendarGrid = (daysRemaining) => {
+    let lastRenderedDaysKey = null;
+    window.renderCalendarGrid = (daysRemaining, isFinished) => {
+      const key = `${daysRemaining}-${isFinished}`;
+      if (lastRenderedDaysKey === key) return;
+      lastRenderedDaysKey = key;
+
       const grid = document.getElementById('dodos-cards-grid');
       if (!grid) return;
       grid.innerHTML = '';
@@ -1082,8 +1390,8 @@
       const total = Math.max(8, daysRemaining + 1);
       for (let i = total; i >= 1; i--) {
         const isTarget = (i === 1);
-        const isCurrent = (i === daysRemaining + 1);
-        const isDone = (i > daysRemaining + 1);
+        const isCurrent = !isFinished && (i === daysRemaining + 1);
+        const isDone = isFinished ? !isTarget : (i > daysRemaining + 1);
 
         let bgClass = "bg-slate-50 border-slate-200 text-slate-400";
         let label = `J-${i - 1}`;
@@ -1097,8 +1405,10 @@
           label = "Aujourd'hui";
           icon = "fa-star";
         } else if (isTarget) {
-          bgClass = "bg-amber-100 border-amber-300 text-amber-800 font-extrabold";
-          label = "Jour J";
+          bgClass = isFinished
+            ? "bg-rose-500 border-rose-500 text-white font-extrabold shadow-md scale-105"
+            : "bg-amber-100 border-amber-300 text-amber-800 font-extrabold";
+          label = isFinished ? "Réunis !" : "Jour J";
           icon = "fa-heart";
         }
 
@@ -1111,14 +1421,13 @@
     };
 
     window.generateRandomSweetMessage = () => {
-      const isLauriane = (window.appState.userProfile.name || '').toLowerCase().includes('lauriane');
-      const partnerName = isLauriane ? 'Ben' : 'Lauriane';
+      const { partnerName } = window.getPartnerIdentity();
 
       const msgs = [
         `Tu me manques un peu plus chaque seconde, vivement nos retrouvailles ${partnerName} ! 💕`,
         `Compter les dodos avant de te revoir est la meilleure activité de ma journée ! 🥰`,
         `Juste un petit mot pour te rappeler à quel point je t'aime ${partnerName}. ✨`,
-        `Tu es mon premier et mon dernier mot de la journée. Hâte de te prendre dans mes bras ! 💖`,
+        `Tu es ma première et ma dernière pensée de la journée. Hâte de te serrer dans mes bras ! 💖`,
         `Chaque jour loin de toi rend nos prochaines retrouvailles encore plus magiques.`
       ];
 
@@ -1136,45 +1445,41 @@
     };
 
     window.openCallPartnerModal = () => {
-      const isLauriane = (window.appState.userProfile.name || '').toLowerCase().includes('lauriane');
-      const partnerName = isLauriane ? 'Ben' : 'Lauriane';
+      const { partnerName } = window.getPartnerIdentity();
       document.getElementById('call-modal-partner-name').innerText = partnerName;
       document.getElementById('modal-call-partner').classList.remove('hidden');
     };
 
     window.triggerDirectPhoneCall = () => {
-      if (partnerPhone) window.location.href = `tel:${partnerPhone}`;
+      if (partnerPhone) window.location.href = `tel:${partnerPhone.replace(/\s+/g, '')}`;
       else alert("Numéro du partenaire non renseigné dans son profil !");
     };
 
+    // Formatage international automatique pour WhatsApp (06... -> 336...)
     window.triggerWhatsAppCall = () => {
-      if (partnerPhone) window.open(`https://wa.me/${partnerPhone.replace(/[^0-9]/g, '')}`, '_blank');
-      else alert("Numéro du partenaire non renseigné dans son profil !");
+      if (!partnerPhone) return alert("Numéro du partenaire non renseigné dans son profil !");
+      let digits = partnerPhone.replace(/[^0-9+]/g, '');
+      if (digits.startsWith('+')) digits = digits.slice(1);
+      if (digits.startsWith('0') && digits.length === 10) {
+        digits = '33' + digits.slice(1);
+      }
+      window.open(`https://wa.me/${digits}`, '_blank');
     };
 
     window.openTeleportModal = () => {
       const currentTarget = window.appState.sharedData.targetDate;
       const isUsed = window.appState.userProfile.teleportUsedForTarget === currentTarget;
-      const badge = document.getElementById('teleport-credit-badge');
       const btn = document.getElementById('teleport-launch-btn');
       const term = document.getElementById('teleport-terminal');
 
       if (isUsed) {
-        if (badge) {
-          badge.innerText = "0/1 épuisé";
-          badge.className = "text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700";
-        }
         btn.disabled = true;
-        btn.className = "w-full bg-slate-800 text-slate-500 text-xs font-bold py-2.5 rounded-xl cursor-not-allowed mb-2";
-        term.innerHTML = "> CRÉDIT ÉPUISÉ POUR CETTE PÉRIODE.<br>> Attendez les prochaines retrouvailles pour réinitialiser le système.";
+        btn.className = "w-full bg-slate-800 text-slate-500 text-xs font-bold py-3 rounded-xl cursor-not-allowed mb-2";
+        term.innerHTML = "&gt; CRÉDIT ÉPUISÉ POUR CETTE PÉRIODE.<br>&gt; Attendez les prochaines retrouvailles pour réinitialiser le système.";
       } else {
-        if (badge) {
-          badge.innerText = "1/1 disponible";
-          badge.className = "text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-800";
-        }
         btn.disabled = false;
-        btn.className = "w-full bg-cyan-500 text-slate-900 text-xs font-bold py-2.5 rounded-xl shadow mb-2 hover:bg-cyan-400 transition";
-        term.innerHTML = "> Système prêt.<br>> Consomme 1 jeton de téléportation.";
+        btn.className = "tap-bounce w-full bg-cyan-500 text-slate-900 text-xs font-bold py-3 rounded-xl shadow mb-2 hover:bg-cyan-400 transition";
+        term.innerHTML = "&gt; Système prêt.<br>&gt; Consomme 1 jeton de téléportation.";
       }
 
       document.getElementById('modal-teleport').classList.remove('hidden');
@@ -1186,12 +1491,12 @@
       const btn = document.getElementById('teleport-launch-btn');
 
       btn.disabled = true;
-      term.innerHTML = "> Connexion aux satellites quantiques...<br>";
+      term.innerHTML = "&gt; Connexion aux satellites quantiques...<br>";
 
-      setTimeout(() => { term.innerHTML += "> Calcul des coordonnées du partenaire...<br>"; }, 1000);
-      setTimeout(() => { term.innerHTML += "> ERREUR 404 : Densité d'amour trop élevée pour la matière physique !<br>"; }, 2200);
+      setTimeout(() => { term.innerHTML += "&gt; Calcul des coordonnées du partenaire...<br>"; }, 1000);
+      setTimeout(() => { term.innerHTML += "&gt; ERREUR 404 : Densité d'amour trop élevée pour la matière physique !<br>"; }, 2200);
       setTimeout(async () => {
-        term.innerHTML += "<span class='text-amber-400'>> Crédit consommé. Conseil : Passez un coup de fil direct !</span>";
+        term.innerHTML += "<span class='text-amber-400'>&gt; Crédit consommé. Conseil : Passez un coup de fil direct !</span>";
         
         window.appState.userProfile.teleportUsedForTarget = currentTarget;
         await setDoc(doc(db, "users", currentUser.uid), { teleportUsedForTarget: currentTarget }, { merge: true });
@@ -1201,6 +1506,7 @@
     window.switchTab = (tabId) => {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
       document.getElementById(tabId).classList.remove('hidden');
+      document.getElementById('app-container').scrollTop = 0;
 
       document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('text-brand-blue', 'font-bold');
@@ -1214,11 +1520,13 @@
       }
     };
 
-    window.openPhotoViewer = (img, title, sub, author) => {
-      document.getElementById('viewer-photo-img').src = img;
-      document.getElementById('viewer-photo-title').innerText = title;
-      document.getElementById('viewer-photo-sub').innerText = sub;
-      document.getElementById('viewer-photo-author').innerText = "Par " + (author || 'Duo');
+    window.openPhotoViewerById = (id) => {
+      const memory = (window.appState.sharedData.memories || []).find(m => m.id === id);
+      if (!memory) return;
+      document.getElementById('viewer-photo-img').src = memory.img;
+      document.getElementById('viewer-photo-title').innerText = memory.title;
+      document.getElementById('viewer-photo-sub').innerText = memory.sub || memory.date || '';
+      document.getElementById('viewer-photo-author').innerText = "Par " + (memory.author || 'Duo');
       document.getElementById('modal-photo-viewer').classList.remove('hidden');
     };
 
@@ -1231,15 +1539,17 @@
       document.getElementById('modal-message').classList.remove('hidden');
     };
 
+    let toastTimeout = null;
     window.showToast = (msg) => {
       const toast = document.getElementById('toast-banner');
       document.getElementById('toast-message').innerText = msg;
-      toast.classList.remove('opacity-0', '-translate-y-24');
+      toast.classList.remove('opacity-0', '-translate-y-28');
       toast.classList.add('opacity-100', 'translate-y-0');
-      setTimeout(() => {
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
         toast.classList.remove('opacity-100', 'translate-y-0');
-        toast.classList.add('opacity-0', '-translate-y-24');
-      }, 2500);
+        toast.classList.add('opacity-0', '-translate-y-28');
+      }, 2600);
     };
 
     setInterval(window.updateCountdown, 1000);
@@ -1248,31 +1558,46 @@
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       window.addEventListener('load', async () => {
         try {
-          const registration = await navigator.serviceWorker.register('sw.js');
+          const registration = await navigator.serviceWorker.register('./sw.js');
           
-          import("https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js").then(async ({ getMessaging, getToken, onMessage }) => {
+          import("https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js").then(({ getMessaging, getToken, onMessage }) => {
             const messaging = getMessaging(app);
 
-            window.enablePushNotifications = async () => {
+            window.enablePushNotifications = async (silent = false) => {
               try {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                  const currentToken = await getToken(messaging, {
-                    serviceWorkerRegistration: registration,
-                    vapidKey: VAPID_KEY
-                  });
-
-                  if (currentToken && currentUser) {
-                    await setDoc(doc(db, "users", currentUser.uid), { fcmToken: currentToken }, { merge: true });
-                  }
+                const permission = silent ? Notification.permission : await Notification.requestPermission();
+                if (permission !== 'granted') {
+                  if (!silent) alert("Autorisez les notifications dans les réglages de votre téléphone pour recevoir les alertes.");
+                  return false;
                 }
+
+                const currentToken = await getToken(messaging, {
+                  serviceWorkerRegistration: registration,
+                  vapidKey: VAPID_KEY
+                });
+
+                if (currentToken && currentUser) {
+                  window.appState.userProfile.fcmToken = currentToken;
+                  await setDoc(doc(db, "users", currentUser.uid), { fcmToken: currentToken }, { merge: true });
+                  window.updatePushStatusUI();
+                  return true;
+                }
+                return false;
               } catch (err) {
                 console.error("Erreur Push:", err);
+                if (!silent) alert("Erreur lors de l'activation Push : vérifiez que sw.js et manifest.json sont bien en ligne sur GitHub.");
+                return false;
               }
             };
 
+            // Si l'utilisateur est déjà connecté et avait déjà autorisé, rafraîchit le token automatiquement
+            if (currentUser && Notification.permission === "granted") {
+              window.enablePushNotifications(true);
+            }
+
             onMessage(messaging, (payload) => {
-              window.triggerLovePingEffect(payload.notification ? payload.notification.title : "Pensée reçue !");
+              const senderTitle = payload.data?.title || payload.notification?.title || "Ton partenaire";
+              window.triggerLovePingEffect(senderTitle);
             });
           });
 
