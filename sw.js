@@ -13,11 +13,11 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-  const title = payload.notification ? payload.notification.title : "Love Tracker Duo 💖";
+  const title = payload.notification ? payload.notification.title : "ManqueTropFort 💖";
   const options = {
     body: payload.notification ? payload.notification.body : "Nouvelle pensée reçue !",
-    icon: "https://cdn-icons-png.flaticon.com/512/2589/2589175.png",
-    badge: "https://cdn-icons-png.flaticon.com/512/2589/2589175.png"
+    icon: "Gemini_Generated_Image_n7y02rn7y02rn7y0.png",
+    badge: "Gemini_Generated_Image_n7y02rn7y02rn7y0.png"
   };
 
   self.registration.showNotification(title, options);
